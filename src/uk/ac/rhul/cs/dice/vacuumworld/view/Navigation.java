@@ -3,6 +3,15 @@ package uk.ac.rhul.cs.dice.vacuumworld.view;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+
+/*
+ * 
+ * 
+ * WARNING: obsolete class
+ * 
+ * 
+ * 
+ */
 public class Navigation {
 	private HttpServletRequest request;
 	private HttpServletResponse response;

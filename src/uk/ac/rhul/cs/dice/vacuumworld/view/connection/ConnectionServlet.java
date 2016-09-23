@@ -10,6 +10,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import uk.ac.rhul.cs.dice.vacuumworld.view.session.ConnectionWithController;
 import uk.ac.rhul.cs.dice.vacuumworld.view.utils.HandshakeException;
 import uk.ac.rhul.cs.dice.vacuumworld.view.utils.Utils;
 
@@ -51,7 +52,10 @@ public class ConnectionServlet extends HttpServlet {
 		Socket socketWithController = Handshake.attemptHanshake(Utils.CONTROLLER_IP, Utils.CONTROLLER_PORT);
 		
 		if(socketWithController != null) {
-			request.getSession().setAttribute("SOCKET_WITH_CONTROLLER", socketWithController);
+			ConnectionWithController connection = new ConnectionWithController();
+			connection.setSocketWithController(socketWithController);
+			
+			request.getSession().setAttribute("CONNECTION", connection);
 			request.getSession().setAttribute("CONNECTED_FLAG", true);
 			request.getRequestDispatcher("main.jsp").forward(request, response);
 		}

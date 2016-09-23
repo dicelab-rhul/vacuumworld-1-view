@@ -1,9 +1,11 @@
 package uk.ac.rhul.cs.dice.vacuumworld.view;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class StateForView {
+public class StateForView implements Serializable {
+	private static final long serialVersionUID = 5675058262192956723L;
 	private int width;
 	private int height;
 	private List<String> gridImagesPaths;

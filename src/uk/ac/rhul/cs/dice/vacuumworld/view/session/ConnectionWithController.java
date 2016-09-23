@@ -3,15 +3,17 @@ package uk.ac.rhul.cs.dice.vacuumworld.view.session;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.net.Socket;
 
-public class VacuumWorldCommunicationSession {
+public class ConnectionWithController implements Serializable {
+	private static final long serialVersionUID = -1708021650155359519L;
 	private Socket socketWithController;
 	private ObjectInputStream input;
 	private ObjectOutputStream output;
 	private boolean sessionRequested;
 	
-	public VacuumWorldCommunicationSession() {
+	public ConnectionWithController() {
 		this.sessionRequested = true;
 	}
 	

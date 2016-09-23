@@ -4,6 +4,14 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 
+/*
+ * 
+ * 
+ * WARNING: obsolete class
+ * 
+ * 
+ * 
+ */
 public class SessionRunnable implements Runnable {
 	private Navigation currentViewRequest;
 	private Navigation newViewRequest;

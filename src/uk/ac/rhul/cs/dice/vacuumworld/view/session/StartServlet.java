@@ -25,24 +25,30 @@ public class StartServlet extends HttpServlet {
 	
 	@Override
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		if(request.getSession().getAttribute("CONNECTED_FLAG") == null) {
-			request.getRequestDispatcher("index.jsp").forward(request, response);
+		try {
+			if(request.getSession().getAttribute("CONNECTED_FLAG") == null) {
+				request.getRequestDispatcher("index.jsp").forward(request, response);
+			}
+			else {
+				doWork(request, response);
+			}
 		}
-		else {
-			doWork(request, response);
+		catch(Exception e) {
+			e.printStackTrace();
+			//ignore
 		}
 	}
 	
-	private void doWork(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
+	private void doWork(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException, ClassNotFoundException {
 		if(request.getParameterValues("INITIAL[]") != null) { //TODO change this
 			startSystemFromUserDefinedData(request, response);
 		}
 		else {
-			//TODO
+			//ignore
 		}
 	}
 	
-	private void startSystemFromUserDefinedData(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
+	private void startSystemFromUserDefinedData(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException, ClassNotFoundException {
 		String[] initialState = request.getParameterValues("INITIAL[]");
 		
 		if(initialState != null) {
@@ -72,13 +78,8 @@ public class StartServlet extends HttpServlet {
 			
 			ViewRequestsEnum requestType = ViewRequestsEnum.fromString("NEW");
 			ViewRequest viewRequest = JsonParser.generateViewRequest(requestType, initialState);
-			//TODO do the first view request (start the system)
 			
-			request.getSession().setAttribute("GRID", true);
-			
-			response.setContentType("text");
-			response.getWriter().print("grid.jsp");
-			response.getWriter().flush();
+			doFirstRequest(request, response, viewRequest);
 		}
 		else {
 			request.setAttribute("ERROR", "null initial state");
@@ -86,7 +87,29 @@ public class StartServlet extends HttpServlet {
 		}
 	}
 	
-	private void doWork(VacuumWorldCommunicationSession session, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
+	private void doFirstRequest(HttpServletRequest request, HttpServletResponse response, ViewRequest viewRequest) throws IOException, ClassNotFoundException {
+		ConnectionWithController connection = (ConnectionWithController) request.getSession().getAttribute("CONNECTION");
+		connection.getOutput().writeObject(viewRequest);
+		ModelUpdate update = (ModelUpdate) connection.getInput().readObject();
+		
+		StateForView state = JsonParser.createStateDataForView(update);
+		
+		request.getSession().setAttribute("GRID", state);
+		
+		response.setContentType("text");
+		response.getWriter().print("grid.jsp");
+		response.getWriter().flush();
+	}
+
+	/*
+	 * 
+	 * 
+	 * WARNING: obsolete method
+	 * 
+	 * 
+	 * 
+	 */
+	private void doWork(ConnectionWithController session, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
 		String requestTypeString = (String) request.getAttribute("REQUEST_TYPE");
 		
 		if(requestTypeString != null) {

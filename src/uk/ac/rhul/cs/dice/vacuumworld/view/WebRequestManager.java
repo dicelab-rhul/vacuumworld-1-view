@@ -10,6 +10,15 @@ import java.net.Socket;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+
+/*
+ * 
+ * 
+ * WARNING: obsolete class
+ * 
+ * 
+ * 
+ */
 public class WebRequestManager {
 	private static Socket connectionWithController;
 	private static InputStream input;
