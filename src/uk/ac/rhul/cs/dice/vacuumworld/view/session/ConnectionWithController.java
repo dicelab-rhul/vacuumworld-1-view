@@ -17,10 +17,10 @@ public class ConnectionWithController implements Serializable {
 		this.sessionRequested = true;
 	}
 	
-	public void setSocketWithController(Socket socket) throws IOException {
+	public void setSocketWithController(Socket socket, ObjectOutputStream output, ObjectInputStream input) throws IOException {
 		this.socketWithController = socket;
-		this.input = new ObjectInputStream(socket.getInputStream());
-		this.output = new ObjectOutputStream(socket.getOutputStream());
+		this.input = input;
+		this.output = output;
 	}
 
 	public Socket getSocketWithController() {

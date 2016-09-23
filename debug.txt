@@ -1,0 +1,1 @@
+5 yes no begin_location|2|2|agent|orange|south|end_location begin_location|4|5|agent|green|west|end_location

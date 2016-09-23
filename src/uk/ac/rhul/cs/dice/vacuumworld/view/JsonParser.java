@@ -1,5 +1,6 @@
 package uk.ac.rhul.cs.dice.vacuumworld.view;
 
+import java.io.FileOutputStream;
 import java.io.Serializable;
 import java.io.StringReader;
 import java.util.ArrayList;
@@ -13,6 +14,7 @@ import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 import javax.json.JsonReader;
 import javax.json.JsonValue;
+import javax.json.JsonWriter;
 import javax.servlet.http.HttpServletRequest;
 
 import uk.ac.rhul.cs.dice.vacuumworld.view.representation.AgentRepresentation;
@@ -141,7 +143,20 @@ public class JsonParser {
 		}
 		
 		JsonObject initialState = createTemplate(gridSize, gridSize, locationsList, user, monitoring);
+		dumpJson(initialState);
+		
 		return new ViewRequest(code, initialState.toString());
+	}
+
+	private static void dumpJson(JsonObject initialState) {
+		try {
+			JsonWriter writer = Json.createWriter(new FileOutputStream("/home/cloudstrife9999/workspace/VacuumWorldWeb/state.json"));
+			writer.write(initialState);
+			writer.close();
+		}
+		catch(Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 	private static List<ObjectRepresentation> parseLocation(String[] info) {

@@ -3,8 +3,6 @@ package uk.ac.rhul.cs.dice.vacuumworld.view.connection;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.net.Socket;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -15,20 +13,13 @@ import uk.ac.rhul.cs.dice.vacuumworld.view.utils.HandshakeException;
 
 public class Handshake {
 	private static final String ERROR = "Bad handshake.";
-	private static final int TIME_TO_WAIT = 10000;
+	private static final int TIME_TO_WAIT = 100000;
 	
 	private Handshake(){}
 	
-	public static Socket attemptHanshake(String controllerIp, int controllerPort) throws HandshakeException {
+	public static Boolean attemptHandshake(ObjectOutputStream output, ObjectInputStream input) throws HandshakeException {
 		ExecutorService executor = Executors.newSingleThreadExecutor();
-		
-		Future<Socket> future = executor.submit(new Callable<Socket>() {
-
-			@Override
-			public Socket call() throws Exception {
-				return doHanshake(controllerIp, controllerPort);
-			}
-		});
+		Future<Boolean> future = executor.submit(() -> doHanshake(output, input));
 		
 		try {
 			return future.get(TIME_TO_WAIT, TimeUnit.MILLISECONDS);
@@ -38,66 +29,69 @@ public class Handshake {
 		}
 	}
 
-	private static Socket doHanshake(String controllerIp, int controllerPort) throws IOException, ClassNotFoundException {
+	/*private static Boolean doHanshake(String controllerIp, int controllerPort) throws IOException, ClassNotFoundException {
 		Socket socketWithController = new Socket(controllerIp, controllerPort);
 		ObjectOutputStream output = new ObjectOutputStream(socketWithController.getOutputStream());
 		ObjectInputStream input = new ObjectInputStream(socketWithController.getInputStream());
 		
 		return doHanshake(socketWithController, input, output);
-	}
+	}*/
 	
-	private static Socket doHanshake(Socket socketWithController, ObjectInputStream input, ObjectOutputStream output) throws IOException, ClassNotFoundException {
-		output.writeObject(HandshakeCodes.VHVC);
+	private static Boolean doHanshake(ObjectOutputStream output, ObjectInputStream input) throws IOException, ClassNotFoundException {
+		output.writeObject(HandshakeCodes.VHVC.toString());
 		output.flush();
+		System.out.println("sent VHVC to controller");
 		
-		Object o = input.readObject();
+		HandshakeCodes code = HandshakeCodes.fromString((String) input.readObject());
+		System.out.println("received " + (code == null ? null : code.toString()) + " from controller");
 		
-		if(o instanceof HandshakeCodes) {
-			return continueHandshake(socketWithController, input, (HandshakeCodes) o);
+		if(code != null) {
+			return continueHandshake(input, code);
 		}
 		else {
 			throw new IOException(ERROR);
 		}
 	}
 
-	private static Socket continueHandshake(Socket socketWithController, ObjectInputStream input, HandshakeCodes code) throws ClassNotFoundException, IOException {
+	private static Boolean continueHandshake(ObjectInputStream input, HandshakeCodes code) throws ClassNotFoundException, IOException {
 		if(!HandshakeCodes.CHCV.equals(code) && !HandshakeCodes.CHMV.equals(code)) {
 			throw new IllegalArgumentException(ERROR);
 		}
 		else {
-			Object o = input.readObject();
+			HandshakeCodes otherCode = HandshakeCodes.fromString((String) input.readObject());
+			System.out.println("received " + (otherCode == null ? null : otherCode.toString()) + " from controller");
 			
-			return continueHandshake(socketWithController, code, o);
+			return continueHandshake(code, otherCode);
 		}
 	}
 
-	private static Socket continueHandshake(Socket socketWithController, HandshakeCodes firstCode, Object otherCode) throws IOException {
-		if(!(otherCode instanceof HandshakeCodes)) {
+	private static Boolean continueHandshake(HandshakeCodes firstCode, HandshakeCodes otherCode) throws IOException {
+		if(otherCode == null) {
 			throw new IOException(ERROR);
 		}
 		else {
-			return finalizeHandshake(socketWithController, firstCode, (HandshakeCodes) otherCode);
+			return finalizeHandshake(firstCode, otherCode);
 		}
 	}
 
-	private static Socket finalizeHandshake(Socket socketWithController, HandshakeCodes firstCode, HandshakeCodes secondCode) {
+	private static Boolean finalizeHandshake(HandshakeCodes firstCode, HandshakeCodes secondCode) {
 		if(HandshakeCodes.CHCV.equals(firstCode)) {
-			return checkEquality(socketWithController, secondCode, HandshakeCodes.CHMV);
+			return checkEquality(secondCode, HandshakeCodes.CHMV);
 		}
 		else if(HandshakeCodes.CHMV.equals(firstCode)) {
-			return checkEquality(socketWithController, secondCode, HandshakeCodes.CHCV);
+			return checkEquality(secondCode, HandshakeCodes.CHCV);
 		}
 		else {
 			throw new IllegalArgumentException(ERROR);
 		}
 	}
 
-	private static Socket checkEquality(Socket socketWithController, HandshakeCodes codeTocheck, HandshakeCodes value) {
+	private static Boolean checkEquality(HandshakeCodes codeTocheck, HandshakeCodes value) {
 		if(!codeTocheck.equals(value)) {
 			throw new IllegalArgumentException(ERROR);
 		}
 		else {
-			return socketWithController;
+			return true;
 		}
 	}
 }

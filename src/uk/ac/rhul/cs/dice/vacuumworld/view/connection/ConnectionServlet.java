@@ -1,6 +1,8 @@
 package uk.ac.rhul.cs.dice.vacuumworld.view.connection;
 
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.nio.channels.AlreadyConnectedException;
 
@@ -49,18 +51,17 @@ public class ConnectionServlet extends HttpServlet {
 	}
 
 	private void doWork(HttpServletRequest request, HttpServletResponse response) throws IOException, HandshakeException, ServletException {
-		Socket socketWithController = Handshake.attemptHanshake(Utils.CONTROLLER_IP, Utils.CONTROLLER_PORT);
-		
-		if(socketWithController != null) {
+		Socket socketWithController = new Socket(Utils.CONTROLLER_IP, Utils.CONTROLLER_PORT);
+		ObjectOutputStream output = new ObjectOutputStream(socketWithController.getOutputStream());
+		ObjectInputStream input = new ObjectInputStream(socketWithController.getInputStream());
+				
+		if(Handshake.attemptHandshake(output, input)) {
 			ConnectionWithController connection = new ConnectionWithController();
-			connection.setSocketWithController(socketWithController);
+			connection.setSocketWithController(socketWithController, output, input);
 			
 			request.getSession().setAttribute("CONNECTION", connection);
 			request.getSession().setAttribute("CONNECTED_FLAG", true);
 			request.getRequestDispatcher("main.jsp").forward(request, response);
-		}
-		else {
-			throw new HandshakeException("Null socket.");
 		}
 	}
 }
