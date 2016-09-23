@@ -1,0 +1,54 @@
+@CHARSET "US-ASCII";
+
+.centered_div {
+	text-align: center;
+	margin: auto;
+}
+
+.ui-dialog-titlebar{
+     text-align: center;
+}
+
+.dialog {
+	display: none;
+}
+
+.radio_choices {
+	text-align: left;
+}
+
+.no-close .ui-dialog-titlebar-close {
+    display: none;
+}
+
+.vwname {
+	text-align: center;
+	display: block;
+    font-size: 2em;
+    font-weight: bold;
+}
+
+#unlocked {
+	margin-top: 27px;
+	margin-bottom: 20px;
+}
+
+#load_template {
+	text-align: center;
+	margin: auto;
+}
+
+#load_file {
+	text-align: center;
+	margin: auto;
+}
+
+#new_simulation {
+	text-align: center;
+	margin: auto;
+}
+
+#new_simulation_3 {
+	text-align: center;
+	margin: auto;
+}
