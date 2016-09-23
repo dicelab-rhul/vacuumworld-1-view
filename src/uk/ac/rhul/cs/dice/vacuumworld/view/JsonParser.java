@@ -1,6 +1,7 @@
 package uk.ac.rhul.cs.dice.vacuumworld.view;
 
 import java.io.Serializable;
+import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -10,6 +11,8 @@ import javax.json.JsonArray;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
+import javax.json.JsonReader;
+import javax.json.JsonValue;
 import javax.servlet.http.HttpServletRequest;
 
 import uk.ac.rhul.cs.dice.vacuumworld.view.representation.AgentRepresentation;
@@ -23,9 +26,67 @@ public class JsonParser {
 	private JsonParser() {}
 	
 	public static StateForView createStateDataForView(ModelUpdate update) {
-		return null;
+		JsonReader reader = Json.createReader(new StringReader((String) update.getPayload()));
+		JsonObject state = reader.readObject();
+		
+		int size = state.getInt("width");
+		JsonArray notableLocations = state.getJsonArray("notable_locations");
+		
+		//no need for now to get user and monitoring flags
+		
+		return createStateDataForView(size, notableLocations);
 	}
 	
+	private static StateForView createStateDataForView(int size, JsonArray notableLocations) {
+		List<String> imagesPaths = new ArrayList<>();
+		
+		for(int i=0; i<size; i++) {
+			for(int j=0; j<size; j++) {
+				imagesPaths.add(fetchImagePath(i, j, notableLocations));
+			}
+		}
+		
+		return new StateForView(size, size, imagesPaths);
+	}
+
+	private static String fetchImagePath(int i, int j, JsonArray notableLocations) {
+		for(JsonValue location : notableLocations) {
+			if(location instanceof JsonObject) {
+				if(((JsonObject) location).getInt("x") == i && ((JsonObject) location).getInt("x") == j) {
+					return getImagePathFromLocation((JsonObject) location);
+				}
+			}
+		}
+		
+		return "images/location.png";
+	}
+
+	private static String getImagePathFromLocation(JsonObject location) {
+		if(location.containsKey("agent")) {
+			JsonObject agent = location.getJsonObject("agent");
+			String color = agent.getString("color");
+			String direction = agent.getString("facing_direction");
+			
+			return getImagePathFromAgent(color, direction);
+		}
+		else if(location.containsKey("dirt")) {
+			String color = location.getString("dirt");
+			
+			return getImageFromDirt(color);
+		}
+		else {
+			return "images/location.png";
+		}
+	}
+
+	private static String getImageFromDirt(String color) {
+		return "images/" + color + "_dirt.png";
+	}
+
+	private static String getImagePathFromAgent(String color, String direction) {
+		return "images/" + color + "_" + direction + ".png";
+	}
+
 	public static ViewRequest generateViewRequest(ViewRequestsEnum code, Object data) {
 		switch(code) {
 		case NEW:

@@ -25,7 +25,7 @@ public class GridServlet extends HttpServlet {
 	@Override
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		try {
-			sendRequest(request);
+			sendRequest(request, response);
 		}
 		catch(Exception e) {
 			//do nothing
@@ -37,7 +37,7 @@ public class GridServlet extends HttpServlet {
 		}
 	}
 
-	private void sendRequest(HttpServletRequest request) throws IOException, ClassNotFoundException {
+	private void sendRequest(HttpServletRequest request, HttpServletResponse response) throws IOException, ClassNotFoundException {
 		String requestCode = request.getParameter("REQUEST_CODE");
 		
 		if(requestCode != null) {
@@ -47,7 +47,20 @@ public class GridServlet extends HttpServlet {
 			ModelUpdate update = (ModelUpdate) connection.getInput().readObject();
 			
 			StateForView state = JsonParser.createStateDataForView(update);
-			request.getSession().setAttribute("GRID", state);
+			String data = "{ \"size\": " + state.getWidth() + ", \"images\": [" + getImagesList(state.getGridImagesPaths()) + "] }";
+
+			response.setContentType("application/json");
+			response.getWriter().print(data);
 		}
+	}
+
+	private String getImagesList(String[] gridImagesPaths) {
+		String toReturn = "";
+		
+		for(String path : gridImagesPaths) {
+			toReturn += "{ \"image\": " + path + "}";
+		}
+		
+		return toReturn;
 	}
 }

@@ -16,6 +16,12 @@ public class StateForView implements Serializable {
 		this.gridImagesPaths = new ArrayList<>();
 	}
 	
+	public StateForView(int width, int height, List<String> imagesPaths) {
+		this.width = width;
+		this.height = height;
+		this.gridImagesPaths = imagesPaths;
+	}
+	
 	public void addImage(String imagePath) {
 		this.gridImagesPaths.add(imagePath);
 	}
@@ -28,7 +34,7 @@ public class StateForView implements Serializable {
 		return this.height;
 	}
 
-	public List<String> getGridImagesPaths() {
-		return this.gridImagesPaths;
+	public String[] getGridImagesPaths() {
+		return this.gridImagesPaths.toArray(new String[this.gridImagesPaths.size()]);
 	}
 }
