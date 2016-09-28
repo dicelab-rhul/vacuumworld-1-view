@@ -212,6 +212,7 @@ function collectDataAndStartSystem() {
 	var monitoring = $("#monitoring_active").attr('checked') === "checked" ? "yes" : "no";
 	
 	var locations = buildNotableLocations(size);
+	//alert(locations);
 	var initialState = [size, userPresent, monitoring, locations];
 	
 	//var serializedInitialState = $.serialize(initialState);
@@ -238,8 +239,8 @@ function buildNotableLocations(size) {
 			var candidate = buildLocationIfNecessary(x, y, id);
 			
 			if(candidate != null) {
-				alert(candidate);
-				locations += locations === "" ? candidate : "#" + candidate;
+				//alert(candidate);
+				locations += (locations === "" ? candidate : "#" + candidate);
 			}
 		}
 	}

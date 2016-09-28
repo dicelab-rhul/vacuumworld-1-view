@@ -11,4 +11,9 @@ public class FirstCoordinateRepresentation extends ObjectRepresentation {
 	public int getCoordinate() {
 		return this.coordinate;
 	}
+	
+	@Override
+	public String toString() {
+		return "[BEGIN FIRST COORDINATE] value: " + getCoordinate() + " [END FIRST COORDINATE]";
+	}
 }

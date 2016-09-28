@@ -11,4 +11,9 @@ private int coordinate;
 	public int getCoordinate() {
 		return this.coordinate;
 	}
+	
+	@Override
+	public String toString() {
+		return "[BEGIN SECOND COORDINATE] value: " + getCoordinate() + " [END SECOND COORDINATE]";
+	}
 }

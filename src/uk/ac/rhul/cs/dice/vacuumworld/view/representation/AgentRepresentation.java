@@ -17,4 +17,10 @@ public class AgentRepresentation extends AvatarRepresentation {
 	public int getActuatorsNumber() {
 		return this.actuatorsNumber;
 	}
+	
+	@Override
+	public String toString() {
+		return "[BEGIN AGENT] id: " + getId() + ", name: " + getName() + ", color: " + getColor() + ", sensors: " + getSensorsNumber() + ", actuators: " + getActuatorsNumber() +
+				", dimensions: (" + getDimensions()[0] + ", " + getDimensions()[1] + "), facing: " + getFacingDirection() + " [END AGENT]";
+	}
 }

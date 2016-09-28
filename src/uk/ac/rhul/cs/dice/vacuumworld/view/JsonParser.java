@@ -23,6 +23,7 @@ import uk.ac.rhul.cs.dice.vacuumworld.view.representation.DirtRepresentation;
 import uk.ac.rhul.cs.dice.vacuumworld.view.representation.FirstCoordinateRepresentation;
 import uk.ac.rhul.cs.dice.vacuumworld.view.representation.ObjectRepresentation;
 import uk.ac.rhul.cs.dice.vacuumworld.view.representation.SecondCoordinateRepresentation;
+import uk.ac.rhul.cs.dice.vacuumworld.view.utils.Utils;
 
 public class JsonParser {
 	private JsonParser() {}
@@ -120,6 +121,8 @@ public class JsonParser {
 	}
 
 	private static ViewRequest createStartRequestFromUserDefinedTemplate(ViewRequestsEnum code, String[] data) {
+		Utils.log(Utils.LOGS_PATH + "initial_state.txt", false, data);
+		
 		if(data.length < 3) {
 			return null;
 		}
@@ -135,9 +138,16 @@ public class JsonParser {
 		
 		if(data.length == 4) {			
 			String[] locations = data[3].split("#");
+			Utils.log(Utils.LOGS_PATH + "locations.txt", true, "#BEGIN#");
+			Utils.log(Utils.LOGS_PATH + "locations.txt", true, locations);
+			Utils.log(Utils.LOGS_PATH + "locations.txt", true, "#END#");
 			
 			for(String location : locations) {
-				String[] info = location.split("|");
+				Utils.log(Utils.LOGS_PATH + "locations.txt", true, location);
+				String[] info = location.split("\\|");
+				Utils.log(Utils.LOGS_PATH + "locations.txt", true, "#BEGIN INFO#");
+				Utils.log(Utils.LOGS_PATH + "locations.txt", true, info);
+				Utils.log(Utils.LOGS_PATH + "locations.txt", true, "#END INFO#");
 				locationsList.add(parseLocation(info));
 			}
 		}
@@ -163,13 +173,16 @@ public class JsonParser {
 		List<ObjectRepresentation> toReturn = new ArrayList<>();
 		
 		if("begin_location".equals(info[0])) {
-			parseLocation(toReturn, info);
+			toReturn = parseLocation(toReturn, info);
+		}
+		else {
+			throw new RuntimeException(info[0]);
 		}
 		
 		return toReturn;
 	}
 
-	private static void parseLocation(List<ObjectRepresentation> toReturn, String[] info) {
+	private static List<ObjectRepresentation> parseLocation(List<ObjectRepresentation> toReturn, String[] info) {
 		int x = Integer.parseInt(info[1]);
 		int y = Integer.parseInt(info[2]);
 		
@@ -179,26 +192,31 @@ public class JsonParser {
 		toReturn.add(first);
 		toReturn.add(second);
 		
-		parseAdditionalContent(toReturn, info);
+		return parseAdditionalContent(toReturn, info);
 	}
 
-	private static void parseAdditionalContent(List<ObjectRepresentation> toReturn, String[] info) {
+	private static List<ObjectRepresentation> parseAdditionalContent(List<ObjectRepresentation> toReturn, String[] info) {
 		if("agent".equals(info[3])) {
-			parseAgent(toReturn, info);
+			return parseAgent(toReturn, info);
 		}
 		else if("dirt".equals(info[3])) {
-			parseDirt(toReturn, info);
+			return parseDirt(toReturn, info);
+		}
+		else {
+			return toReturn;
 		}
 	}
 
-	private static void parseDirt(List<ObjectRepresentation> toReturn, String[] info) {
+	private static List<ObjectRepresentation> parseDirt(List<ObjectRepresentation> toReturn, String[] info) {
 		String dirt = info[4];
 		
 		DirtRepresentation dirtRepresentation = new DirtRepresentation(dirt);
 		toReturn.add(dirtRepresentation);
+		
+		return toReturn;
 	}
 
-	private static void parseAgent(List<ObjectRepresentation> toReturn, String[] info) {
+	private static List<ObjectRepresentation> parseAgent(List<ObjectRepresentation> toReturn, String[] info) {
 		String id = UUID.randomUUID().toString();
 		String name = id;
 		String color = info[4];
@@ -210,6 +228,8 @@ public class JsonParser {
 		
 		AgentRepresentation agentRepresentation = new AgentRepresentation(id, name, color, sensorsNumber, actuatorsNumber, new int[]{width, height}, facingDirection);
 		toReturn.add(agentRepresentation);
+		
+		return toReturn;
 	}
 
 	private static ViewRequest sendStopSignal(ViewRequestsEnum code, HttpServletRequest request) {
@@ -231,7 +251,7 @@ public class JsonParser {
 		return new ViewRequest(code, (Serializable) data);
 	}
 
-	private static ViewRequest createTemplate(ViewRequestsEnum code, HttpServletRequest request) {
+	/*private static ViewRequest createTemplate(ViewRequestsEnum code, HttpServletRequest request) {
 		int width = (int) request.getAttribute("WIDTH");
 		int height = (int) request.getAttribute("HEIGHT");
 		boolean user = (boolean) request.getAttribute("USER");
@@ -283,10 +303,12 @@ public class JsonParser {
 		}
 		
 		return createTemplate(width, height, temp, user, monitoring);
-	}
+	}*/
 
 	private static JsonObject createTemplate(int width, int height, List<List<ObjectRepresentation>> locations, boolean user, boolean monitoring) {
 		JsonArrayBuilder array = Json.createArrayBuilder();
+		
+		//Utils.log(Utils.LOGS_PATH + "locations.txt", false, ""); //clear log
 		
 		for(List<ObjectRepresentation> location : locations) {
 			array.add(buildLocation(location));
@@ -320,6 +342,8 @@ public class JsonParser {
 				continue;
 			}
 		}
+		
+		Utils.log(Utils.LOGS_PATH + "locations.txt", true, "\n\n"); //clear log
 		
 		return builder.build();
 	}
