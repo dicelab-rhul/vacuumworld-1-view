@@ -36,21 +36,31 @@
 
 			StateForView state = (StateForView) session.getAttribute("GRID");
 			int size = state.getWidth();
-			String[] imagesPaths = state.getGridImagesPaths();
-			
+			String[] imagesPaths = state.getGridImagesPaths();			
 			%>
-			<script>populateGridAndRefresh(<%=size%>, <%=imagesPaths%>);</script>
-			<%
-			
-			
-			%>
-				<div class="centered_div" id="grid"></div>
-				<div id="grid_options">
+				<div class="centered_div" id="grid">
+				<%
+					int counter = 0;
+				
+					for(String path : imagesPaths) {
+						if(counter >= size) {
+							counter = 0;
+							%><br /><%
+						}
+						
+						counter++;
+						%><img class="grid_image" src=<%=path%> style="border: 1px solid #000000;"/><%
+					}
+				%>
+				</div>
+				<br />
+				<div class ="centered_div" id="grid_options">
 					<form id="main_menu_options_form">
 						<input type="button" class="main_menu_button" id="stop_button" name="stop" value="STOP" />
 					</form>
 				</div>
 			<%
+			session.setAttribute("FIRST_CYCLE_DONE", true);
 		}
 		else if(session.getAttribute("GRID") == null) {
 			//do a post request to /grid to get the current state

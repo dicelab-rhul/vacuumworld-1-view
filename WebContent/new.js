@@ -89,7 +89,7 @@ function populateGridDialog(size) {
 		for(var j = 0; j < size; j++) {
 			var x = i+1, y = j+1;
 			var id = "image_" + x + "_" + y;
-			$("#dialog_grid").append("<img id=\"" + id + "\" class=\"grid_image\" src=\"images/location.png\" style=\"border: 1px solid #000000;\"/>");
+			$("#dialog_grid").append("<img id=\"" + id + "\" class=\"grid_image\" src=\"images/location.png\" />");
 			addClickListener(id);
 		}
 		$("#dialog_grid").append("<br />");
@@ -212,18 +212,9 @@ function collectDataAndStartSystem() {
 	var monitoring = $("#monitoring_active").attr('checked') === "checked" ? "yes" : "no";
 	
 	var locations = buildNotableLocations(size);
-	//alert(locations);
 	var initialState = [size, userPresent, monitoring, locations];
 	
-	//var serializedInitialState = $.serialize(initialState);
-	
 	$.post("start", {INITIAL:initialState}, function(data) {
-		//var splitted = data.split("|");
-		
-		/*for(var i=1; i < splitted.length; i++) {
-			alert(splitted[i]);
-		}*/
-		//window.location = splitted[0];
 		window.location = data;
 	});
 }
@@ -239,7 +230,6 @@ function buildNotableLocations(size) {
 			var candidate = buildLocationIfNecessary(x, y, id);
 			
 			if(candidate != null) {
-				//alert(candidate);
 				locations += (locations === "" ? candidate : "#" + candidate);
 			}
 		}
@@ -261,7 +251,6 @@ function createNotableLocation(x, y, image_path) {
 	var name = image_path.split("/")[1];
 	
 	if(!(name.match("dirt"))) {
-		//alert("not matched dirt");
 		return createNotableLocationWithAgent(x, y, name);
 	}
 	else {
@@ -303,17 +292,14 @@ function createNotableLocationWithAgentHelper(x, y, color, name) {
 }
 
 function packLocationWithAgent(x, y, color, facing) {
-	//return [x, y, ["agent", color, facing]];
 	return "begin_location|" + x + "|" + y + "|" + "agent" + "|" + color + "|" + facing + "|end_location";
 }
 
 function createNotableLocationWithDirt(x, y, name) {
 	if(name.match("green")) {
-		//return [x, y, ["dirt", "green"]];
 		return "begin_location|" + x + "|" + y + "|dirt|green|end_location";
 	}
 	else if(name.match("orange")) {
-		//return [x, y, ["dirt", "orange"]];
 		return "begin_location|" + x + "|" + y + "|dirt|orange|end_location";
 	}
 	else {

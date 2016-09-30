@@ -1,41 +1,50 @@
 $(document).ready(function() {
 	$(function() {
-		if(session.getAttribute("GRID") != null) {
-			populateGridAndRefresh(session.getAttribute("GRID"));
+		while($("#grid").html() === "") {
+			continue;
 		}
+		
+		refresh();
 	});
 });
 
-function populateGridAndRefresh(size, imagesPathsArray) {
-	var j=1;
-	var i=1;
-	
-	var grid="";
-	
-	for(var path in imagesPathsArray) {
-		if(j > size) {
-			j=1;
-			i++;
-		}
-		
-		var id = "image_" + i + "_" + j;
-		grid += "<img src=\"" + path + "\" class=\"grid_image\" id=\"" + id + "\" style=\"border: 1px solid #000000;\" />"; 
-	}
-	
-	$("#grid").append(grid);
-	
+function refresh() {
 	doAjaxRequestForNewUpdate();
 }
 
 function doAjaxRequestForNewUpdate() {
 	$.post("grid", {REQUEST_CODE:"GET_STATE"}, function(data) {
-		var images = data.images;
+		var state = JSON.parse(JSON.stringify(data));
+		var images = state.images;
 		var imgs = [];
 		
-		for(var img in images) {
-			imgs.append(img);
+		for(var i = 0; i < images.length; i++) {
+		    imgs.push(images[i].image);
 		}
 		
-		populateGridAndRefresh(data.size, imgs);
+		populateGridAndRefresh(state.size, imgs);
 	});
+}
+
+function populateGridAndRefresh(size, images) {
+	var counter = 0;
+	
+	$("#grid").html("");
+	$("#grid").append("<br />");
+	
+	for(var i=0; i<images.length; i++) {
+		if(counter >= size) {
+			counter = 0;
+			var br = $("<br />");
+			br.appendTo("#grid");
+		}
+		
+		counter++;
+		var img = $("<img>");
+		img.attr("src", images[i]);
+		img.attr("class", "grid_image");
+		img.appendTo("#grid");
+	}
+	
+	doAjaxRequestForNewUpdate();
 }

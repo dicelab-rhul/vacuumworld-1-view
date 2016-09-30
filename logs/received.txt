@@ -1,0 +1,1 @@
+{"size":5,"notable_locations":[{"x":0,"y":0,"agent":{"id":"c5bd9bb6-bdf0-409d-ae2f-d5e442a4a3a7","name":"c5bd9bb6-bdf0-409d-ae2f-d5e442a4a3a7","color":"green","sensors":2,"actuators":2,"width":1,"height":1,"facing_direction":"east"}},{"x":3,"y":4,"dirt":"green"}]}

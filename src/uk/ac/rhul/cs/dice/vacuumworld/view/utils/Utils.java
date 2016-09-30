@@ -1,6 +1,7 @@
 package uk.ac.rhul.cs.dice.vacuumworld.view.utils;
 
 import java.io.FileOutputStream;
+import java.io.IOException;
 
 public class Utils {
 	public static final String CONTROLLER_IP = "127.0.0.1";
@@ -9,20 +10,32 @@ public class Utils {
 	
 	private Utils(){}
 	
+	public static void freshLog(String filename, String... toLog) {
+		log(filename, false, toLog);
+	}
+	
+	public static void log(String filename, String... toLog) {
+		log(filename, true, toLog);
+	}
+	
 	public static void log(String filename, boolean append, String... toLog) {
 		try {
 			FileOutputStream fo = new FileOutputStream(filename, append);
-			
-			for(String line : toLog) {
-				fo.write(line.getBytes());
-				fo.write("\n".getBytes());
-			}
-			
-			fo.flush();
+			log(fo, toLog);
 			fo.close();
 		}
-		catch(Exception e) {
+		catch(IOException e) {
 			e.printStackTrace(System.err);
 		}
+		
+	}
+
+	private static void log(FileOutputStream fo, String... toLog) throws IOException {
+		for(String line : toLog) {
+			fo.write(line.getBytes());
+			fo.write("\n".getBytes());
+		}
+		
+		fo.flush();
 	}
 }

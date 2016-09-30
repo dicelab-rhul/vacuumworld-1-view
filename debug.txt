@@ -1,1 +1,1 @@
-10 yes no begin_location|1|1|dirt|green|end_location begin_location|10|10|agent|green|east|end_location
+5 yes no begin_location|3|1|agent|green|north|end_location begin_location|4|5|dirt|green|end_location

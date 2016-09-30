@@ -1,5 +1,6 @@
 package uk.ac.rhul.cs.dice.vacuumworld.view;
 
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.Serializable;
 import java.io.StringReader;
@@ -28,11 +29,17 @@ import uk.ac.rhul.cs.dice.vacuumworld.view.utils.Utils;
 public class JsonParser {
 	private JsonParser() {}
 	
-	public static StateForView createStateDataForView(ModelUpdate update) {
+	public static StateForView createStateDataForView(ModelUpdate update) throws FileNotFoundException {
 		JsonReader reader = Json.createReader(new StringReader((String) update.getPayload()));
 		JsonObject state = reader.readObject();
 		
-		int size = state.getInt("width");
+		JsonWriter writer = Json.createWriter(new FileOutputStream(Utils.LOGS_PATH + "received.txt"));
+		writer.writeObject(state);
+		writer.close();
+		
+		reader.close();
+		
+		int size = state.getInt("size");
 		JsonArray notableLocations = state.getJsonArray("notable_locations");
 		
 		//no need for now to get user and monitoring flags
@@ -55,7 +62,7 @@ public class JsonParser {
 	private static String fetchImagePath(int i, int j, JsonArray notableLocations) {
 		for(JsonValue location : notableLocations) {
 			if(location instanceof JsonObject) {
-				if(((JsonObject) location).getInt("x") == i && ((JsonObject) location).getInt("x") == j) {
+				if(((JsonObject) location).getInt("x") == i && ((JsonObject) location).getInt("y") == j) {
 					return getImagePathFromLocation((JsonObject) location);
 				}
 			}
@@ -130,9 +137,6 @@ public class JsonParser {
 		int gridSize = Integer.parseInt(data[0]);
 		boolean user = "yes".equals(data[1]) ? true : false;
 		boolean monitoring = "yes".equals(data[2]) ? true : false;
-		
-		// begin_location|2|4|agent|orange|north|end_location
-		// begin_location|2|9|dirt|orange|end_location
 		
 		List<List<ObjectRepresentation>> locationsList = new ArrayList<>();
 		
@@ -250,60 +254,6 @@ public class JsonParser {
 		
 		return new ViewRequest(code, (Serializable) data);
 	}
-
-	/*private static ViewRequest createTemplate(ViewRequestsEnum code, HttpServletRequest request) {
-		int width = (int) request.getAttribute("WIDTH");
-		int height = (int) request.getAttribute("HEIGHT");
-		boolean user = (boolean) request.getAttribute("USER");
-		boolean monitoring = (boolean) request.getAttribute("MONITORING");
-		
-		Object locations = request.getAttribute("LOCATIONS");
-		
-		JsonObject json = createTemplate(width, height, locations, user, monitoring);
-		return new ViewRequest(code, json.toString());
-	}
-
-	private static JsonObject createTemplate(int width, int height, Object locations, boolean user, boolean monitoring) {
-		if(locations instanceof List<?>) {
-			return createTemplateHelper(width, height, (List<?>) locations, user, monitoring);
-		}
-		else {
-			return null;
-		}
-	}
-	
-	private static JsonObject createTemplateHelper(int width, int height, List<?> locations, boolean user, boolean monitoring) {
-		List<List<?>> temp = new ArrayList<>();
-		
-		for(Object o : locations) {
-			if(o instanceof List<?>) {
-				temp.add((List<?>) o);
-			}
-		}
-		
-		return createTemplateHelperHelper(width, height, temp, user, monitoring);
-	}
-	
-	private static JsonObject createTemplateHelperHelper(int width, int height, List<List<?>> locations, boolean user, boolean monitoring) {
-		List<List<ObjectRepresentation>> temp = new ArrayList<>();
-		
-		for(List<?> o : locations) {
-			List<ObjectRepresentation> tmp = new ArrayList<>();
-			
-			for(Object ob : o) {
-				if(o instanceof ObjectRepresentation) {
-					tmp.add((ObjectRepresentation) ob);
-				}
-			}
-			
-			if(!tmp.isEmpty()) {
-				temp.add(tmp);
-			}
-			
-		}
-		
-		return createTemplate(width, height, temp, user, monitoring);
-	}*/
 
 	private static JsonObject createTemplate(int width, int height, List<List<ObjectRepresentation>> locations, boolean user, boolean monitoring) {
 		JsonArrayBuilder array = Json.createArrayBuilder();

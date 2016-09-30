@@ -12,6 +12,7 @@ import uk.ac.rhul.cs.dice.vacuumworld.view.ModelUpdate;
 import uk.ac.rhul.cs.dice.vacuumworld.view.StateForView;
 import uk.ac.rhul.cs.dice.vacuumworld.view.ViewRequest;
 import uk.ac.rhul.cs.dice.vacuumworld.view.ViewRequestsEnum;
+import uk.ac.rhul.cs.dice.vacuumworld.view.utils.Utils;
 
 @WebServlet("/grid")
 public class GridServlet extends HttpServlet {
@@ -28,39 +29,52 @@ public class GridServlet extends HttpServlet {
 			sendRequest(request, response);
 		}
 		catch(Exception e) {
-			//do nothing
-		}
-		finally {
-			response.setContentType("text");
-			response.getWriter().print("grid.jsp");
-			response.getWriter().flush();
+			e.printStackTrace();
+			//ignore
 		}
 	}
 
 	private void sendRequest(HttpServletRequest request, HttpServletResponse response) throws IOException, ClassNotFoundException {
 		String requestCode = request.getParameter("REQUEST_CODE");
 		
+		Utils.log(Utils.LOGS_PATH + "session.txt", "Received " + requestCode);
+		
 		if(requestCode != null) {
 			ViewRequest viewRequest = new ViewRequest(ViewRequestsEnum.fromString(requestCode), null);
 			ConnectionWithController connection = (ConnectionWithController) request.getSession().getAttribute("CONNECTION");
+			Utils.log(Utils.LOGS_PATH + "session.txt", "Before sending the request");
 			connection.getOutput().writeObject(viewRequest);
+			connection.getOutput().flush();
+			
+			Utils.log(Utils.LOGS_PATH + "session.txt", "Before getting the response");
+			
 			ModelUpdate update = (ModelUpdate) connection.getInput().readObject();
 			
+			Utils.log(Utils.LOGS_PATH + "session.txt", "After getting the response");
+			
 			StateForView state = JsonParser.createStateDataForView(update);
+			
+			Utils.log(Utils.LOGS_PATH + "session.txt", "After parsing");
 			String data = "{ \"size\": " + state.getWidth() + ", \"images\": [" + getImagesList(state.getGridImagesPaths()) + "] }";
-
+			
+			//String data = update.getPayload().toString();
+			Utils.log(Utils.LOGS_PATH + "session.txt", "Got " + data);
+			
 			response.setContentType("application/json");
 			response.getWriter().print(data);
+			response.getWriter().flush();
+			
+			Utils.log(Utils.LOGS_PATH + "session.txt", "Data sent to javascript");
 		}
 	}
 
 	private String getImagesList(String[] gridImagesPaths) {
-		String toReturn = "";
+		StringBuilder builder = new StringBuilder();
 		
 		for(String path : gridImagesPaths) {
-			toReturn += "{ \"image\": " + path + "}";
+			builder.append("{ \"image\": \"" + path + "\"},");
 		}
 		
-		return toReturn;
+		return builder.toString().substring(0, builder.length() - 1); //to cut the last comma.
 	}
 }

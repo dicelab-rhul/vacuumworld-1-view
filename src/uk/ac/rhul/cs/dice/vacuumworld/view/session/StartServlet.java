@@ -2,6 +2,8 @@ package uk.ac.rhul.cs.dice.vacuumworld.view.session;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.Arrays;
+
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -13,6 +15,7 @@ import uk.ac.rhul.cs.dice.vacuumworld.view.ModelUpdate;
 import uk.ac.rhul.cs.dice.vacuumworld.view.StateForView;
 import uk.ac.rhul.cs.dice.vacuumworld.view.ViewRequest;
 import uk.ac.rhul.cs.dice.vacuumworld.view.ViewRequestsEnum;
+import uk.ac.rhul.cs.dice.vacuumworld.view.utils.Utils;
 
 @WebServlet("/start")
 public class StartServlet extends HttpServlet {
@@ -40,7 +43,7 @@ public class StartServlet extends HttpServlet {
 	}
 	
 	private void doWork(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException, ClassNotFoundException {
-		if(request.getParameterValues("INITIAL[]") != null) { //TODO change this
+		if(request.getParameterValues("INITIAL[]") != null) {
 			startSystemFromUserDefinedData(request, response);
 		}
 		else {
@@ -54,8 +57,6 @@ public class StartServlet extends HttpServlet {
 		if(initialState != null) {
 			
 			FileOutputStream fo = new FileOutputStream("/home/cloudstrife9999/workspace/VacuumWorldWeb/debug.txt", false);
-			
-			//fo.write((initialState.length + " ").getBytes());
 			
 			for(int i=0; i<initialState.length; i++) {
 				if(initialState[i].contains("#")) {
@@ -90,55 +91,29 @@ public class StartServlet extends HttpServlet {
 	private void doFirstRequest(HttpServletRequest request, HttpServletResponse response, ViewRequest viewRequest) throws IOException, ClassNotFoundException {
 		ConnectionWithController connection = (ConnectionWithController) request.getSession().getAttribute("CONNECTION");
 		connection.getOutput().writeObject(viewRequest);
+		connection.getOutput().flush();
+		
+		Utils.freshLog(Utils.LOGS_PATH + "session.txt", "Waiting for model update");
+		
 		ModelUpdate update = (ModelUpdate) connection.getInput().readObject();
 		
-		StateForView state = JsonParser.createStateDataForView(update);
+		Utils.log(Utils.LOGS_PATH + "session.txt", "Received model update");
 		
-		request.getSession().setAttribute("GRID", state);
-		
-		response.setContentType("text");
-		response.getWriter().print("grid.jsp");
-		response.getWriter().flush();
-	}
-
-	/*
-	 * 
-	 * 
-	 * WARNING: obsolete method
-	 * 
-	 * 
-	 * 
-	 */
-	private void doWork(ConnectionWithController session, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
-		String requestTypeString = (String) request.getAttribute("REQUEST_TYPE");
-		
-		if(requestTypeString != null) {
-			ViewRequestsEnum requestType = ViewRequestsEnum.fromString(requestTypeString);
-			ViewRequest viewRequest = JsonParser.generateViewRequest(requestType, request);
-			session.getOutput().writeObject(viewRequest);
-			session.getOutput().flush();
+		try {
+			StateForView state = JsonParser.createStateDataForView(update);
+			Utils.log(Utils.LOGS_PATH + "session.txt", "Parsed model update");
 			
-			try {
-				Object raw = session.getInput().readObject();
-				
-				if(raw instanceof ModelUpdate) {
-					ModelUpdate update = (ModelUpdate) raw;
-					StateForView newState = JsonParser.createStateDataForView(update);
-					request.setAttribute("UPDATE", newState);		
-				}
-			}
-			catch(ClassNotFoundException e) {
-				if(request.getAttribute("UPDATE") == null) {
-					response.sendRedirect("index.jsp");
-				}
-			}
-			finally {
-				request.getSession().setAttribute("STARTED", true);
-				request.getRequestDispatcher("grid.jsp").forward(request, response);
-			}			
+			request.getSession().setAttribute("GRID", state);
+			
+			response.setContentType("text");
+			response.getWriter().println("grid.jsp");
+			response.getWriter().flush();
+			
+			Utils.log(Utils.LOGS_PATH + "session.txt", "Sent response to new.js");
 		}
-		else {
-			response.sendRedirect("index.jsp");
+		catch(Exception e) {
+			Utils.log(Utils.LOGS_PATH + "session.txt", e.getMessage() + "\n" + Arrays.toString(e.getStackTrace()));
+			e.printStackTrace();
 		}
 	}
 }

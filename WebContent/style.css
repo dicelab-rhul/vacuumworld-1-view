@@ -28,6 +28,10 @@
     font-weight: bold;
 }
 
+.grid_image {
+	border: 1px solid #000000;
+}
+
 #unlocked {
 	margin-top: 27px;
 	margin-bottom: 20px;
