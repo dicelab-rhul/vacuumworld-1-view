@@ -1,12 +1,25 @@
+var stopped = false;
+
 $(document).ready(function() {
 	$(function() {
 		while($("#grid").html() === "") {
 			continue;
 		}
-		
+		listenForStopButton();
 		refresh();
 	});
 });
+
+function listenForStopButton() {
+	$("#stop_button").on("click", function() {
+		$.post("grid", {REQUEST_CODE:"STOP"}, function(data) {
+			if(data === "stopped") {
+				stopped = true;
+				window.location = "index.jsp";
+			}
+		});
+	});
+}
 
 function refresh() {
 	doAjaxRequestForNewUpdate();
@@ -46,5 +59,7 @@ function populateGridAndRefresh(size, images) {
 		img.appendTo("#grid");
 	}
 	
-	doAjaxRequestForNewUpdate();
+	if(!stopped) {
+		doAjaxRequestForNewUpdate();
+	}
 }

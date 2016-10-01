@@ -29,7 +29,6 @@ public class GridServlet extends HttpServlet {
 			sendRequest(request, response);
 		}
 		catch(Exception e) {
-			e.printStackTrace();
 			//ignore
 		}
 	}
@@ -40,14 +39,27 @@ public class GridServlet extends HttpServlet {
 		Utils.log(Utils.LOGS_PATH + "session.txt", "Received " + requestCode);
 		
 		if(requestCode != null) {
-			ViewRequest viewRequest = new ViewRequest(ViewRequestsEnum.fromString(requestCode), null);
-			ConnectionWithController connection = (ConnectionWithController) request.getSession().getAttribute("CONNECTION");
-			Utils.log(Utils.LOGS_PATH + "session.txt", "Before sending the request");
-			connection.getOutput().writeObject(viewRequest);
-			connection.getOutput().flush();
-			
-			Utils.log(Utils.LOGS_PATH + "session.txt", "Before getting the response");
-			
+			manageRequestCode(request, response, requestCode);
+		}
+	}
+
+	private void manageRequestCode(HttpServletRequest request, HttpServletResponse response, String requestCode) throws IOException, ClassNotFoundException {
+		ViewRequest viewRequest = new ViewRequest(ViewRequestsEnum.fromString(requestCode), null);
+		ConnectionWithController connection = (ConnectionWithController) request.getSession().getAttribute("CONNECTION");
+		Utils.log(Utils.LOGS_PATH + "session.txt", "Before sending the request");
+		connection.getOutput().writeObject(viewRequest);
+		connection.getOutput().flush();
+		
+		Utils.log(Utils.LOGS_PATH + "session.txt", "Before getting the response");
+		
+		waitForResponse(request, response, requestCode, connection);
+	}
+
+	private void waitForResponse(HttpServletRequest request, HttpServletResponse response, String requestCode, ConnectionWithController connection) throws IOException, ClassNotFoundException {
+		if("STOP".equals(requestCode)) {
+			stopSystem(request, response);
+		}
+		else {
 			ModelUpdate update = (ModelUpdate) connection.getInput().readObject();
 			
 			Utils.log(Utils.LOGS_PATH + "session.txt", "After getting the response");
@@ -57,7 +69,6 @@ public class GridServlet extends HttpServlet {
 			Utils.log(Utils.LOGS_PATH + "session.txt", "After parsing");
 			String data = "{ \"size\": " + state.getWidth() + ", \"images\": [" + getImagesList(state.getGridImagesPaths()) + "] }";
 			
-			//String data = update.getPayload().toString();
 			Utils.log(Utils.LOGS_PATH + "session.txt", "Got " + data);
 			
 			response.setContentType("application/json");
@@ -66,6 +77,16 @@ public class GridServlet extends HttpServlet {
 			
 			Utils.log(Utils.LOGS_PATH + "session.txt", "Data sent to javascript");
 		}
+	}
+
+	private void stopSystem(HttpServletRequest request, HttpServletResponse response) throws IOException {
+		request.getSession().invalidate();
+		
+		response.setContentType("text");
+		response.getWriter().print("stopped");
+		response.getWriter().flush();
+		
+		Utils.log(Utils.LOGS_PATH + "session.txt", "Data sent to javascript");
 	}
 
 	private String getImagesList(String[] gridImagesPaths) {

@@ -1635,3 +1635,148 @@ end_location
 
 
 
+#BEGIN#
+begin_location|2|5|dirt|orange|end_location
+begin_location|4|1|agent|orange|east|end_location
+#END#
+begin_location|2|5|dirt|orange|end_location
+#BEGIN INFO#
+begin_location
+2
+5
+dirt
+orange
+end_location
+#END INFO#
+begin_location|4|1|agent|orange|east|end_location
+#BEGIN INFO#
+begin_location
+4
+1
+agent
+orange
+east
+end_location
+#END INFO#
+
+
+
+
+
+
+#BEGIN#
+begin_location|3|2|dirt|orange|end_location
+begin_location|1|4|agent|orange|north|end_location
+#END#
+begin_location|3|2|dirt|orange|end_location
+#BEGIN INFO#
+begin_location
+3
+2
+dirt
+orange
+end_location
+#END INFO#
+begin_location|1|4|agent|orange|north|end_location
+#BEGIN INFO#
+begin_location
+1
+4
+agent
+orange
+north
+end_location
+#END INFO#
+
+
+
+
+
+
+#BEGIN#
+begin_location|1|2|dirt|green|end_location
+begin_location|2|1|agent|green|east|end_location
+#END#
+begin_location|1|2|dirt|green|end_location
+#BEGIN INFO#
+begin_location
+1
+2
+dirt
+green
+end_location
+#END INFO#
+begin_location|2|1|agent|green|east|end_location
+#BEGIN INFO#
+begin_location
+2
+1
+agent
+green
+east
+end_location
+#END INFO#
+
+
+
+
+
+
+#BEGIN#
+begin_location|1|2|dirt|green|end_location
+begin_location|2|1|agent|green|east|end_location
+#END#
+begin_location|1|2|dirt|green|end_location
+#BEGIN INFO#
+begin_location
+1
+2
+dirt
+green
+end_location
+#END INFO#
+begin_location|2|1|agent|green|east|end_location
+#BEGIN INFO#
+begin_location
+2
+1
+agent
+green
+east
+end_location
+#END INFO#
+
+
+
+
+
+
+#BEGIN#
+begin_location|4|1|agent|green|north|end_location
+begin_location|4|6|dirt|green|end_location
+#END#
+begin_location|4|1|agent|green|north|end_location
+#BEGIN INFO#
+begin_location
+4
+1
+agent
+green
+north
+end_location
+#END INFO#
+begin_location|4|6|dirt|green|end_location
+#BEGIN INFO#
+begin_location
+4
+6
+dirt
+green
+end_location
+#END INFO#
+
+
+
+
+
+

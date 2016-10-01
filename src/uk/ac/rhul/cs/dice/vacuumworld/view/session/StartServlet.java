@@ -46,11 +46,18 @@ public class StartServlet extends HttpServlet {
 		if(request.getParameterValues("INITIAL[]") != null) {
 			startSystemFromUserDefinedData(request, response);
 		}
+		else if(request.getParameter("TEMPLATE_FILE") != null) {
+			startSystemFromTemplateFile(request, response);
+		}
 		else {
 			//ignore
 		}
 	}
 	
+	private void startSystemFromTemplateFile(HttpServletRequest request, HttpServletResponse response) {
+		// TODO Auto-generated method stub
+	}
+
 	private void startSystemFromUserDefinedData(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException, ClassNotFoundException {
 		String[] initialState = request.getParameterValues("INITIAL[]");
 		

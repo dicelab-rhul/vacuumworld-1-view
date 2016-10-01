@@ -64,7 +64,9 @@
 			session.setAttribute("FIRST_CYCLE_DONE", true);
 		}
 		else if(session.getAttribute("GRID") == null) {
-			//do a post request to /grid to get the current state
+			%>
+				<jsp:forward page="main.jsp" />
+			<%
 		}
 	%>
 
