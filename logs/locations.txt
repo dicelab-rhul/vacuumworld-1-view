@@ -1548,3 +1548,90 @@ end_location
 
 
 
+#BEGIN#
+begin_location|3|1|agent|green|north|end_location
+#END#
+begin_location|3|1|agent|green|north|end_location
+#BEGIN INFO#
+begin_location
+3
+1
+agent
+green
+north
+end_location
+#END INFO#
+
+
+
+#BEGIN#
+begin_location|4|2|dirt|green|end_location
+#END#
+begin_location|4|2|dirt|green|end_location
+#BEGIN INFO#
+begin_location
+4
+2
+dirt
+green
+end_location
+#END INFO#
+
+
+
+#BEGIN#
+begin_location|9|5|dirt|green|end_location
+begin_location|4|4|agent|green|north|end_location
+begin_location|7|6|dirt|orange|end_location
+begin_location|1|8|agent|orange|north|end_location
+#END#
+begin_location|9|5|dirt|green|end_location
+#BEGIN INFO#
+begin_location
+9
+5
+dirt
+green
+end_location
+#END INFO#
+begin_location|4|4|agent|green|north|end_location
+#BEGIN INFO#
+begin_location
+4
+4
+agent
+green
+north
+end_location
+#END INFO#
+begin_location|7|6|dirt|orange|end_location
+#BEGIN INFO#
+begin_location
+7
+6
+dirt
+orange
+end_location
+#END INFO#
+begin_location|1|8|agent|orange|north|end_location
+#BEGIN INFO#
+begin_location
+1
+8
+agent
+orange
+north
+end_location
+#END INFO#
+
+
+
+
+
+
+
+
+
+
+
+

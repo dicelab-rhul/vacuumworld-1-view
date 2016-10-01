@@ -39,6 +39,7 @@
 			String[] imagesPaths = state.getGridImagesPaths();			
 			%>
 				<div class="centered_div" id="grid">
+				<br />
 				<%
 					int counter = 0;
 				

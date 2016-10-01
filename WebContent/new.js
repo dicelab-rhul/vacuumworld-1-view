@@ -184,8 +184,19 @@ function listenForRecapOkButton() {
 
 function listenForRecapSaveButton() {
 	$("#recap_save_button").on("click", function() {
-		//TODO save the template
+		var toSave = collectData();
+		var tmp = "";
 		
+		for(var i=0; i< toSave.length; i++) {
+			tmp += toSave[i];
+			
+			if(i != toSave.length - 1) {
+				tmp += "@";
+			}
+		}
+		
+		var filename = randomString(20) + ".txt";
+		download(filename, tmp);
 		return false;
 	});
 }
@@ -207,16 +218,20 @@ function resetNewTemplateSelection() {
 }
 
 function collectDataAndStartSystem() {
+	var initialState = collectData();
+	
+	$.post("start", {INITIAL:initialState}, function(data) {
+		window.location = data;
+	});
+}
+
+function collectData() {
 	var size = document.forms["grid_size"]["grid_size"].value;
 	var userPresent = $("#user_present").attr('checked') === "checked" ? "yes" : "no";
 	var monitoring = $("#monitoring_active").attr('checked') === "checked" ? "yes" : "no";
 	
 	var locations = buildNotableLocations(size);
-	var initialState = [size, userPresent, monitoring, locations];
-	
-	$.post("start", {INITIAL:initialState}, function(data) {
-		window.location = data;
-	});
+	return [size, userPresent, monitoring, locations];
 }
 
 function buildNotableLocations(size) {
@@ -305,4 +320,23 @@ function createNotableLocationWithDirt(x, y, name) {
 	else {
 		return null;
 	}
+}
+
+function randomString(length) {
+    var text = "";
+    var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    for(var i = 0; i < length; i++) {
+        text += possible.charAt(Math.floor(Math.random() * possible.length));
+    }
+    return text;
+}
+
+function download(filename, text) {
+	var element = document.createElement('a');
+	element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+	element.setAttribute('download', filename);
+	element.style.display = 'none';
+	document.body.appendChild(element);
+	element.click();
+	document.body.removeChild(element);
 }

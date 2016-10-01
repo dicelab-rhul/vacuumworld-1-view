@@ -1,4 +1,4 @@
-5
-yes
+10
 no
-begin_location|3|1|agent|green|north|end_location#begin_location|4|5|dirt|green|end_location
+no
+begin_location|9|5|dirt|green|end_location#begin_location|4|4|agent|green|north|end_location#begin_location|7|6|dirt|orange|end_location#begin_location|1|8|agent|orange|north|end_location

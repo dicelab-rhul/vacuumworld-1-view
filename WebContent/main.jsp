@@ -120,7 +120,7 @@
 						<input type="radio" name="template" value="t5" /> Grid: 10x10 - green agents: 1 - orange agents: 1 - green dirt: 1 - orange dirt: 1<br />
 						<br />
 						<div class="centered_div">
-							<input type="submit" value="Load" />
+							<input type="button" value="Load" id="load_template_ok_button"/>
 							<input type="button" value="Cancel" id="cancel_template_upload" />
 						</div>
 					</form>
