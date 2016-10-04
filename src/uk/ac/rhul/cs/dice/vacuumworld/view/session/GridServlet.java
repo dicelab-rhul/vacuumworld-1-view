@@ -1,6 +1,7 @@
 package uk.ac.rhul.cs.dice.vacuumworld.view.session;
 
 import java.io.IOException;
+
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -8,11 +9,12 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import uk.ac.rhul.cs.dice.vacuumworld.view.JsonParser;
-import uk.ac.rhul.cs.dice.vacuumworld.view.ModelUpdate;
 import uk.ac.rhul.cs.dice.vacuumworld.view.StateForView;
-import uk.ac.rhul.cs.dice.vacuumworld.view.ViewRequest;
-import uk.ac.rhul.cs.dice.vacuumworld.view.ViewRequestsEnum;
 import uk.ac.rhul.cs.dice.vacuumworld.view.utils.Utils;
+import uk.ac.rhul.cs.dice.vacuumworld.wvcommon.ModelMessagesEnum;
+import uk.ac.rhul.cs.dice.vacuumworld.wvcommon.ModelUpdate;
+import uk.ac.rhul.cs.dice.vacuumworld.wvcommon.ViewRequest;
+import uk.ac.rhul.cs.dice.vacuumworld.wvcommon.ViewRequestsEnum;
 
 @WebServlet("/grid")
 public class GridServlet extends HttpServlet {
@@ -44,7 +46,8 @@ public class GridServlet extends HttpServlet {
 	}
 
 	private void manageRequestCode(HttpServletRequest request, HttpServletResponse response, String requestCode) throws IOException, ClassNotFoundException {
-		ViewRequest viewRequest = new ViewRequest(ViewRequestsEnum.fromString(requestCode), null);
+		ViewRequestsEnum requestCodeEnum = ViewRequestsEnum.fromString(requestCode);
+		ViewRequest viewRequest = new ViewRequest(requestCodeEnum, null);
 		ConnectionWithController connection = (ConnectionWithController) request.getSession().getAttribute("CONNECTION");
 		Utils.log(Utils.LOGS_PATH + "session.txt", "Before sending the request");
 		connection.getOutput().writeObject(viewRequest);
@@ -52,31 +55,53 @@ public class GridServlet extends HttpServlet {
 		
 		Utils.log(Utils.LOGS_PATH + "session.txt", "Before getting the response");
 		
-		waitForResponse(request, response, requestCode, connection);
+		waitForResponse(request, response, requestCodeEnum, connection);
 	}
 
-	private void waitForResponse(HttpServletRequest request, HttpServletResponse response, String requestCode, ConnectionWithController connection) throws IOException, ClassNotFoundException {
-		if("STOP".equals(requestCode)) {
+	private void waitForResponse(HttpServletRequest request, HttpServletResponse response, ViewRequestsEnum requestCode, ConnectionWithController connection) throws IOException, ClassNotFoundException {
+		if(ViewRequestsEnum.STOP_FORWARD.equals(requestCode)) {
 			stopSystem(request, response);
 		}
 		else {
 			ModelUpdate update = (ModelUpdate) connection.getInput().readObject();
 			
 			Utils.log(Utils.LOGS_PATH + "session.txt", "After getting the response");
-			
-			StateForView state = JsonParser.createStateDataForView(update);
-			
-			Utils.log(Utils.LOGS_PATH + "session.txt", "After parsing");
-			String data = "{ \"size\": " + state.getWidth() + ", \"images\": [" + getImagesList(state.getGridImagesPaths()) + "] }";
-			
-			Utils.log(Utils.LOGS_PATH + "session.txt", "Got " + data);
-			
-			response.setContentType("application/json");
-			response.getWriter().print(data);
-			response.getWriter().flush();
-			
-			Utils.log(Utils.LOGS_PATH + "session.txt", "Data sent to javascript");
+			manageModelUpdate(update, request, response);
 		}
+	}
+
+	private void manageModelUpdate(ModelUpdate update, HttpServletRequest request, HttpServletResponse response) throws IOException {
+		if(isStopMessage(update)) {
+			manageStop(update, request, response);
+		}
+		else {
+			manageUpdate(update, request, response);
+		}
+	}
+	
+	private void manageStop(ModelUpdate update, HttpServletRequest request, HttpServletResponse response) throws IOException {
+		if(ModelMessagesEnum.STOP_FORWARD.equals(update.getCode())) {
+			stopSystem(request, response);
+		}
+	}
+
+	private boolean isStopMessage(ModelUpdate update) {
+		return ModelMessagesEnum.STOP_FORWARD.equals(update.getCode());
+	}
+
+	private void manageUpdate(ModelUpdate update, HttpServletRequest request, HttpServletResponse response) throws IOException {
+		StateForView state = JsonParser.createStateDataForView(update);
+		
+		Utils.log(Utils.LOGS_PATH + "session.txt", "After parsing");
+		String data = "{ \"size\": " + state.getWidth() + ", \"images\": [" + getImagesList(state.getGridImagesPaths()) + "] }";
+		
+		Utils.log(Utils.LOGS_PATH + "session.txt", "Got " + data);
+		
+		response.setContentType("application/json");
+		response.getWriter().print(data);
+		response.getWriter().flush();
+		
+		Utils.log(Utils.LOGS_PATH + "session.txt", "Data sent to javascript");
 	}
 
 	private void stopSystem(HttpServletRequest request, HttpServletResponse response) throws IOException {

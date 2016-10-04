@@ -25,6 +25,9 @@ import uk.ac.rhul.cs.dice.vacuumworld.view.representation.FirstCoordinateReprese
 import uk.ac.rhul.cs.dice.vacuumworld.view.representation.ObjectRepresentation;
 import uk.ac.rhul.cs.dice.vacuumworld.view.representation.SecondCoordinateRepresentation;
 import uk.ac.rhul.cs.dice.vacuumworld.view.utils.Utils;
+import uk.ac.rhul.cs.dice.vacuumworld.wvcommon.ModelUpdate;
+import uk.ac.rhul.cs.dice.vacuumworld.wvcommon.ViewRequest;
+import uk.ac.rhul.cs.dice.vacuumworld.wvcommon.ViewRequestsEnum;
 
 public class JsonParser {
 	private JsonParser() {}
@@ -110,7 +113,8 @@ public class JsonParser {
 		case MOVE_OBSTACLE:
 		case MOVE_AVATAR:
 			return moveElement(code, (HttpServletRequest) data);
-		case STOP:
+		case STOP_CONTROLLER:
+		case STOP_FORWARD:
 			return sendStopSignal(code, (HttpServletRequest) data);
 		default:
 			throw new IllegalArgumentException("Bad view request code: " + code);
@@ -140,19 +144,22 @@ public class JsonParser {
 		
 		List<List<ObjectRepresentation>> locationsList = new ArrayList<>();
 		
-		if(data.length == 4) {			
-			String[] locations = data[3].split("#");
-			Utils.log(Utils.LOGS_PATH + "locations.txt", true, "#BEGIN#");
-			Utils.log(Utils.LOGS_PATH + "locations.txt", true, locations);
-			Utils.log(Utils.LOGS_PATH + "locations.txt", true, "#END#");
+		if(data.length == 4) {
 			
-			for(String location : locations) {
-				Utils.log(Utils.LOGS_PATH + "locations.txt", true, location);
-				String[] info = location.split("\\|");
-				Utils.log(Utils.LOGS_PATH + "locations.txt", true, "#BEGIN INFO#");
-				Utils.log(Utils.LOGS_PATH + "locations.txt", true, info);
-				Utils.log(Utils.LOGS_PATH + "locations.txt", true, "#END INFO#");
-				locationsList.add(parseLocation(info));
+			if(data[3].length() > 0) {
+				String[] locations = data[3].split("#");
+				Utils.log(Utils.LOGS_PATH + "locations.txt", true, "#BEGIN#");
+				Utils.log(Utils.LOGS_PATH + "locations.txt", true, locations);
+				Utils.log(Utils.LOGS_PATH + "locations.txt", true, "#END#");
+				
+				for(String location : locations) {
+					Utils.log(Utils.LOGS_PATH + "locations.txt", true, location);
+					String[] info = location.split("\\|");
+					Utils.log(Utils.LOGS_PATH + "locations.txt", true, "#BEGIN INFO#");
+					Utils.log(Utils.LOGS_PATH + "locations.txt", true, info);
+					Utils.log(Utils.LOGS_PATH + "locations.txt", true, "#END INFO#");
+					locationsList.add(parseLocation(info));
+				}
 			}
 		}
 		

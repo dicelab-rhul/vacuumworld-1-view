@@ -11,11 +11,12 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import uk.ac.rhul.cs.dice.vacuumworld.view.JsonParser;
-import uk.ac.rhul.cs.dice.vacuumworld.view.ModelUpdate;
 import uk.ac.rhul.cs.dice.vacuumworld.view.StateForView;
-import uk.ac.rhul.cs.dice.vacuumworld.view.ViewRequest;
-import uk.ac.rhul.cs.dice.vacuumworld.view.ViewRequestsEnum;
 import uk.ac.rhul.cs.dice.vacuumworld.view.utils.Utils;
+import uk.ac.rhul.cs.dice.vacuumworld.wvcommon.ModelMessagesEnum;
+import uk.ac.rhul.cs.dice.vacuumworld.wvcommon.ModelUpdate;
+import uk.ac.rhul.cs.dice.vacuumworld.wvcommon.ViewRequest;
+import uk.ac.rhul.cs.dice.vacuumworld.wvcommon.ViewRequestsEnum;
 
 @WebServlet("/start")
 public class StartServlet extends HttpServlet {
@@ -58,6 +59,7 @@ public class StartServlet extends HttpServlet {
 		// TODO Auto-generated method stub
 	}
 
+	//TODO refactor this
 	private void startSystemFromUserDefinedData(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException, ClassNotFoundException {
 		String[] initialState = request.getParameterValues("INITIAL[]");
 		
@@ -95,7 +97,7 @@ public class StartServlet extends HttpServlet {
 		}
 	}
 	
-	private void doFirstRequest(HttpServletRequest request, HttpServletResponse response, ViewRequest viewRequest) throws IOException, ClassNotFoundException {
+	private void doFirstRequest(HttpServletRequest request, HttpServletResponse response, ViewRequest viewRequest) throws IOException, ClassNotFoundException, ServletException {
 		ConnectionWithController connection = (ConnectionWithController) request.getSession().getAttribute("CONNECTION");
 		connection.getOutput().writeObject(viewRequest);
 		connection.getOutput().flush();
@@ -106,6 +108,44 @@ public class StartServlet extends HttpServlet {
 		
 		Utils.log(Utils.LOGS_PATH + "session.txt", "Received model update");
 		
+		manageModelUpdate(update, request, response);
+	}
+
+	private void manageModelUpdate(ModelUpdate update, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
+		if(isErrorOrStop(update)) {
+			manageErrorOrStop(update, request, response);
+		}
+		else {
+			manageUpdate(update, request, response);
+		}
+	}
+
+	private void manageErrorOrStop(ModelUpdate update, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
+		switch(update.getCode()) {
+		case BAD_INITIAL_STATE:
+		case STOP_FORWARD:
+			manageErrorOrStop(request, response);
+			break;
+		default:
+			return;
+		}
+	}
+
+	private void manageErrorOrStop(HttpServletRequest request, HttpServletResponse response) throws IOException {
+		ConnectionWithController connection = (ConnectionWithController) request.getSession().getAttribute("CONNECTION");
+		request.getSession().invalidate();
+		request.getSession().setAttribute("CONNECTED_FLAG", true);
+		request.getSession().setAttribute("CONNECTION", connection);
+		response.setContentType("text");
+		response.getWriter().println("index.jsp");
+		response.getWriter().flush();
+	}
+
+	private boolean isErrorOrStop(ModelUpdate update) {
+		return ModelMessagesEnum.BAD_INITIAL_STATE.equals(update.getCode()) || ModelMessagesEnum.STOP_FORWARD.equals(update.getCode());
+	}
+
+	private void manageUpdate(ModelUpdate update, HttpServletRequest request, HttpServletResponse response) {
 		try {
 			StateForView state = JsonParser.createStateDataForView(update);
 			Utils.log(Utils.LOGS_PATH + "session.txt", "Parsed model update");

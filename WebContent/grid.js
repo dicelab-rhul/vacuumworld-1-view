@@ -12,7 +12,7 @@ $(document).ready(function() {
 
 function listenForStopButton() {
 	$("#stop_button").on("click", function() {
-		$.post("grid", {REQUEST_CODE:"STOP"}, function(data) {
+		$.post("grid", {REQUEST_CODE:"STOP_FORWARD"}, function(data) {
 			if(data === "stopped") {
 				stopped = true;
 				window.location = "index.jsp";

@@ -12,5 +12,5 @@ function positiveInteger(formName, subElementName) {
 	var n = document.forms[formName][subElementName].value;
 	var x = Number(n);
 	
-	return $.isNumeric(x) && x > 0;
+	return $.isNumeric(x) && x > 0 && x <= 10;
 }

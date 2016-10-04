@@ -30,17 +30,20 @@ function listenForGridSizeOkButton() {
 		$("#new_simulation").dialog("close");
 		
 		if(!validateForm("grid_size","grid_size")) {
-			return false;
+			alert("The size must be an integer > 0 and <= 10");
 		}
-		if(!positiveInteger("grid_size", "grid_size")) {
-			return false;
+		else {
+			if(!positiveInteger("grid_size", "grid_size")) {
+				alert("The size must be an integer > 0 and <= 10");
+			}
+			else {
+				createUserAndMonitoringDialog();
+				$("#new_simulation_2").dialog("open");
+				listenForUserAndMonitoringOkButton();
+				
+				return false;
+			}
 		}
-		
-		createUserAndMonitoringDialog();
-		$("#new_simulation_2").dialog("open");
-		listenForUserAndMonitoringOkButton();
-		
-		return false;
 	});
 }
 
@@ -151,6 +154,11 @@ function listenForCancelAddAgentOrDirt() {
 
 function listenForAddAgentsOkButton() {
 	$("#add_agents_ok_button").on("click", function() {
+		if(noAgents()) {
+			alert("Add at least one agent!!!");
+			return false;
+		}		
+		
 		$("#new_simulation_3").dialog("close");
 		
 		createNewTemplateRecapDialog();
@@ -160,6 +168,24 @@ function listenForAddAgentsOkButton() {
 		
 		return false;
 	});
+}
+
+function noAgents() {
+	var size = document.forms["grid_size"]["grid_size"].value;
+	
+	for(var i = 0; i < size; i++) {		
+		for(var j = 0; j < size; j++) {
+			var y = i+1, x = j+1;
+			var id = "image_" + x + "_" + y;
+			var src = $("#" + id).attr("src");
+			
+			if(src != "images/location.png" && src != "images/green_dirt.png" && src != "images/orange_dirt.png" && src != "images/neutral_dirt.png") {
+				return false;
+			}
+		}
+	}
+	
+	return true;
 }
 
 function createNewTemplateRecapDialog() {
