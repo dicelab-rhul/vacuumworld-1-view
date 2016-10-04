@@ -87,7 +87,7 @@ function populateGridDialog(size) {
 	
 	for(var i = 0; i < size; i++) {		
 		for(var j = 0; j < size; j++) {
-			var x = i+1, y = j+1;
+			var y = i+1, x = j+1;
 			var id = "image_" + x + "_" + y;
 			$("#dialog_grid").append("<img id=\"" + id + "\" class=\"grid_image\" src=\"images/location.png\" />");
 			addClickListener(id);

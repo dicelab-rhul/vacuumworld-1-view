@@ -1,4 +1,0 @@
-6
-yes
-no
-begin_location|4|1|agent|green|north|end_location#begin_location|4|6|dirt|green|end_location
