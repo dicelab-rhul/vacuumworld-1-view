@@ -160,7 +160,6 @@ public class StartServlet extends HttpServlet {
 		}
 		catch(Exception e) {
 			Utils.log(Utils.LOGS_PATH + "session.txt", e.getMessage() + "\n" + Arrays.toString(e.getStackTrace()));
-			e.printStackTrace();
 		}
 	}
 }
