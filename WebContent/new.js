@@ -253,8 +253,8 @@ function collectDataAndStartSystem() {
 
 function collectData() {
 	var size = document.forms["grid_size"]["grid_size"].value;
-	var userPresent = $("#user_present").attr('checked') === "checked" ? "yes" : "no";
-	var monitoring = $("#monitoring_active").attr('checked') === "checked" ? "yes" : "no";
+	var userPresent = $("#user_present").checked ? "yes" : "no";
+	var monitoring = $("#monitoring_active").checked ? "yes" : "no";
 	
 	var locations = buildNotableLocations(size);
 	return [size, userPresent, monitoring, locations];
