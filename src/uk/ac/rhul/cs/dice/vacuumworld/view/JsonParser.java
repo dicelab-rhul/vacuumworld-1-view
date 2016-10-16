@@ -82,6 +82,12 @@ public class JsonParser {
 			
 			return getImagePathFromAgent(color, direction);
 		}
+		else if(location.containsKey("user")) {
+			JsonObject user = location.getJsonObject("user");
+			String direction = user.getString("facing_direction");
+			
+			return getImagePathFromUser(direction);
+		}
 		else if(location.containsKey("dirt")) {
 			String color = location.getString("dirt");
 			
@@ -90,6 +96,10 @@ public class JsonParser {
 		else {
 			return "images/location.png";
 		}
+	}
+
+	private static String getImagePathFromUser(String direction) {
+		return "images/user_" + direction + ".png";
 	}
 
 	private static String getImageFromDirt(String color) {
@@ -187,7 +197,7 @@ public class JsonParser {
 			toReturn = parseLocation(toReturn, info);
 		}
 		else {
-			throw new RuntimeException(info[0]);
+			throw new IllegalArgumentException(info[0]);
 		}
 		
 		return toReturn;
@@ -228,7 +238,7 @@ public class JsonParser {
 	}
 
 	private static List<ObjectRepresentation> parseAgent(List<ObjectRepresentation> toReturn, String[] info) {
-		String id = UUID.randomUUID().toString();
+		String id = "Agent-" + UUID.randomUUID().toString();
 		String name = id;
 		String color = info[4];
 		int sensorsNumber = 2;
