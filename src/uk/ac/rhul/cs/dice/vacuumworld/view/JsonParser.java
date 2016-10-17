@@ -1,17 +1,15 @@
 package uk.ac.rhul.cs.dice.vacuumworld.view;
 
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
+
 import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
 import javax.json.JsonValue;
-import javax.json.JsonWriter;
-
 import uk.ac.rhul.cs.dice.vacuumworld.view.session.requests.ViewRequestConcreteFactory;
 import uk.ac.rhul.cs.dice.vacuumworld.view.session.requests.ViewRequestInterface;
 import uk.ac.rhul.cs.dice.vacuumworld.view.session.requests.ViewRequestsFactory;
@@ -22,17 +20,13 @@ import uk.ac.rhul.cs.dice.vacuumworld.wvcommon.ViewRequest;
 import uk.ac.rhul.cs.dice.vacuumworld.wvcommon.ViewRequestsEnum;
 
 public class JsonParser {
-	private static ViewRequestConcreteFactory requestsFactory = new ViewRequestConcreteFactory();
+	public static final ViewRequestConcreteFactory requestsFactory = new ViewRequestConcreteFactory();
 	
 	private JsonParser() {}
 	
 	public static StateForView createStateDataForView(ModelUpdate update) throws FileNotFoundException {
 		JsonReader reader = Json.createReader(new StringReader((String) update.getPayload()));
 		JsonObject state = reader.readObject();
-		
-		JsonWriter writer = Json.createWriter(new FileOutputStream(ConfigData.getLogsPath() + "received.txt"));
-		writer.writeObject(state);
-		writer.close();
 		
 		reader.close();
 		
@@ -56,24 +50,18 @@ public class JsonParser {
 
 	private static String fetchImagePath(int i, int j, JsonArray notableLocations) {
 		for(JsonValue location : notableLocations) {
-			if(location instanceof JsonObject) {
-				return getImagePathFromLocation((JsonObject) location, i, j);
+			if(!(location instanceof JsonObject)) {
+				continue;
+			}
+			if(((JsonObject) location).getInt(Utils.X) == i && ((JsonObject) location).getInt(Utils.Y) == j) {
+				return getImagePathFromLocation((JsonObject) location);
 			}
 		}
 		
 		return ConfigData.getDefaultLocationImagePath();
 	}
 
-	private static String getImagePathFromLocation(JsonObject location, int i, int j) {
-		if(location.getInt(Utils.X) == i && location.getInt(Utils.Y) == j) {
-			return getImagePathFromLocationHelper(location);
-		}
-		else {
-			return ConfigData.getDefaultLocationImagePath();
-		}
-	}
-
-	private static String getImagePathFromLocationHelper(JsonObject location) {
+	private static String getImagePathFromLocation(JsonObject location) {
 		if(location.containsKey(Utils.AGENT)) {
 			JsonObject agent = location.getJsonObject(Utils.AGENT);
 			String color = agent.getString(Utils.COLOR);
@@ -109,7 +97,7 @@ public class JsonParser {
 		return "images/" + color + "_" + direction + ".png";
 	}
 
-	public static ViewRequest generateViewRequestForController(ViewRequestsEnum code, Object data) {
+	public static ViewRequest generateViewRequestForController(ViewRequestsEnum code, Object data) {		
 		ViewRequestInterface request = ViewRequestsFactory.generateViewRequest(code, data);
 		
 		return request.accept(JsonParser.requestsFactory);

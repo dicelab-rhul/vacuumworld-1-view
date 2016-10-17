@@ -23,12 +23,15 @@ public class StartServlet extends HttpServlet {
 
 	@Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		Utils.initConfigDataIfNecessary(request);
 		request.getRequestDispatcher(ConfigData.getMainPage()).forward(request, response);
 	}
 	
 	@Override
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		try {
+			Utils.initConfigDataIfNecessary(request);
+			
 			if(request.getSession().getAttribute(Utils.CONNECTED_FLAG) == null) {
 				request.getRequestDispatcher(ConfigData.getIndexPage()).forward(request, response);
 			}
@@ -60,7 +63,7 @@ public class StartServlet extends HttpServlet {
 	private void startSystemFromUserDefinedData(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException, ClassNotFoundException {
 		String[] initialState = request.getParameterValues(Utils.INITIAL_STATE_ARRAY);
 		
-		if(initialState != null) {
+		if(initialState != null) {			
 			request.getSession().setAttribute(Utils.TEMPLATE, true);
 			
 			ViewRequestsEnum requestType = ViewRequestsEnum.fromString(Utils.NEW);

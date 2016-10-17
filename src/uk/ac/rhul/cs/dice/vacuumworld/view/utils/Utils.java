@@ -1,14 +1,15 @@
 package uk.ac.rhul.cs.dice.vacuumworld.view.utils;
 
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.InputStream;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.servlet.http.HttpServletRequest;
+
 import uk.ac.rhul.cs.dice.vacuumworld.wvcommon.VacuumWorldLogFormatter;
 
-public class Utils {
+public class Utils {	
 	private static final Logger LOGGER = initLogger();
 	
 	public static final String AGENT = "agent";
@@ -46,6 +47,7 @@ public class Utils {
 		VacuumWorldLogFormatter formatter = new VacuumWorldLogFormatter();
 		ConsoleHandler handler = new ConsoleHandler();
 		handler.setFormatter(formatter);
+		handler.setLevel(Level.INFO);
 		logger.addHandler(handler);
 		
 		return logger;
@@ -68,13 +70,11 @@ public class Utils {
 	}
 	
 	public static void fakeLog(Exception e) {
-		log(e);
 		//this exception does not need to be logged
 	}
 
 	public static void log(String message, Exception e) {
 		log(Level.INFO, e.getClass().getCanonicalName() + ": " + message);
-		//log(Level.SEVERE, e.getClass().getCanonicalName() + ": " + message, e);
 	}
 
 	public static void log(Level level, String message) {
@@ -89,32 +89,15 @@ public class Utils {
 		log(source + ": " + message);
 	}
 	
-	public static void freshLog(String filename, String... toLog) {
-		log(filename, false, toLog);
-	}
-	
-	public static void log(String filename, String... toLog) {
-		log(filename, true, toLog);
-	}
-	
-	public static void log(String filename, boolean append, String... toLog) {
-		try {
-			FileOutputStream fo = new FileOutputStream(filename, append);
-			log(fo, toLog);
-			fo.close();
-		}
-		catch(IOException e) {
-			Utils.log(e);
+	public static void initConfigDataIfNecessary(HttpServletRequest request) {
+		if(ConfigData.isInitialized()) {
+			return;
 		}
 		
-	}
-
-	private static void log(FileOutputStream fo, String... toLog) throws IOException {
-		for(String line : toLog) {
-			fo.write(line.getBytes());
-			fo.write("\n".getBytes());
-		}
+		InputStream input = request.getServletContext().getResourceAsStream("/view.json");
 		
-		fo.flush();
+		if(!ConfigData.initConfigData(input)) {
+			throw new IllegalArgumentException("Could not parse configuration file.");
+		}
 	}
 }

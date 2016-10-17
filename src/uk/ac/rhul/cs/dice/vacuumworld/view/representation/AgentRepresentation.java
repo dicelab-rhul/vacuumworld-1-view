@@ -6,7 +6,6 @@ public class AgentRepresentation extends AvatarRepresentation {
 	
 	public AgentRepresentation(String id, String name, String color, int sensorsNumber, int actuatorsNumber, int[] dimensions, String facingDirection) {
 		super(id, name, color, dimensions, facingDirection);
-		
 		this.sensorsNumber = sensorsNumber;
 		this.actuatorsNumber = actuatorsNumber;
 	}

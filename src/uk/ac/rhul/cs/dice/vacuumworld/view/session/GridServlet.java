@@ -23,12 +23,14 @@ public class GridServlet extends HttpServlet {
 
 	@Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		Utils.initConfigDataIfNecessary(request);
 		request.getRequestDispatcher(ConfigData.getGridPage()).forward(request, response);
 	}
 
 	@Override
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		try {
+			Utils.initConfigDataIfNecessary(request);
 			sendRequest(request, response);
 		}
 		catch(Exception e) {
@@ -85,6 +87,7 @@ public class GridServlet extends HttpServlet {
 
 	private void manageUpdate(ModelUpdate update, HttpServletResponse response) throws IOException {
 		StateForView state = JsonParser.createStateDataForView(update);
+		
 		String data = "{ \"size\": " + state.getWidth() + ", \"images\": [" + getImagesList(state.getGridImagesPaths()) + "] }";
 		
 		response.setContentType("application/json");

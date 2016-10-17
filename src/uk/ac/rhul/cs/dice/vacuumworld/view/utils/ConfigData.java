@@ -1,6 +1,5 @@
 package uk.ac.rhul.cs.dice.vacuumworld.view.utils;
 
-import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
@@ -9,18 +8,24 @@ import javax.json.JsonObject;
 import javax.json.JsonReader;
 
 public class ConfigData {
+	private static boolean initialized;
+	
 	private static String defaultLocationImagePath;
 	private static String controllerIp;
 	private static int controllerPort;
 	private static String logsPath;
 	private static int timeoutInSeconds;
 	
-	private static String indexPage = "index.jsp";
-	private static String mainPage = "main.jsp";
-	private static String gridPage = "grid.jsp";
+	private static String indexPage;
+	private static String mainPage;
+	private static String gridPage;
 	
 	private ConfigData() {}
 
+	public static boolean isInitialized() {
+		return ConfigData.initialized;
+	}
+	
 	public static String getDefaultLocationImagePath() {
 		return ConfigData.defaultLocationImagePath;
 	}
@@ -55,15 +60,20 @@ public class ConfigData {
 	
 	public static boolean initConfigData(InputStream input) {
 		try(JsonReader reader = Json.createReader(new InputStreamReader(input))) {
-			return initData(reader);
+			if(initData(reader)) {
+				ConfigData.initialized = true;
+				
+				return true;
+			}
+			else {
+				ConfigData.initialized = false;
+				
+				return false;
+			}
 		}
 		catch(Exception e) {
-			try(FileOutputStream output = new FileOutputStream("debug.txt")) {
-				output.write((e.getMessage() + "\n").getBytes());
-			}
-			catch(Exception ex){}
-			
 			Utils.log(e);
+			ConfigData.initialized = false;
 			
 			return false;
 		}

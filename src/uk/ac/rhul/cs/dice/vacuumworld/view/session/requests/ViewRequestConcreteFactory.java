@@ -20,7 +20,6 @@ import uk.ac.rhul.cs.dice.vacuumworld.view.representation.DirtRepresentation;
 import uk.ac.rhul.cs.dice.vacuumworld.view.representation.FirstCoordinateRepresentation;
 import uk.ac.rhul.cs.dice.vacuumworld.view.representation.ObjectRepresentation;
 import uk.ac.rhul.cs.dice.vacuumworld.view.representation.SecondCoordinateRepresentation;
-import uk.ac.rhul.cs.dice.vacuumworld.view.utils.ConfigData;
 import uk.ac.rhul.cs.dice.vacuumworld.view.utils.Utils;
 import uk.ac.rhul.cs.dice.vacuumworld.wvcommon.ViewRequest;
 import uk.ac.rhul.cs.dice.vacuumworld.wvcommon.ViewRequestsEnum;
@@ -67,9 +66,7 @@ public class ViewRequestConcreteFactory implements ViewRequestsVisitorInterface 
 		return sendStopSignal(request.getCode());
 	}
 	
-	private static ViewRequest createStartRequestFromUserDefinedTemplate(ViewRequestsEnum code, String[] data) {
-		Utils.log(ConfigData.getLogsPath() + "initial_state.txt", false, data);
-		
+	private static ViewRequest createStartRequestFromUserDefinedTemplate(ViewRequestsEnum code, String[] data) {		
 		if(data.length < 3) {
 			return null;
 		}
@@ -213,8 +210,6 @@ public class ViewRequestConcreteFactory implements ViewRequestsVisitorInterface 
 				continue;
 			}
 		}
-		
-		Utils.log(ConfigData.getLogsPath() + "locations.txt", true, "\n\n"); //clear log
 		
 		return builder.build();
 	}

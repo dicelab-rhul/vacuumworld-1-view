@@ -1,8 +1,6 @@
 package uk.ac.rhul.cs.dice.vacuumworld.view.connection;
 
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
@@ -25,61 +23,31 @@ public class ConnectionServlet extends HttpServlet {
 
 	@Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		Utils.initConfigDataIfNecessary(request);
 		request.getRequestDispatcher(ConfigData.getIndexPage()).forward(request, response);
 	}
 	
 	@Override
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		try {
-			checkAlreadyConnected(request);
-			
-			if(!initConfigData(request)) {
-				throw new IllegalArgumentException("Could not parse configuration file.");
-			}
-			
-			System.out.println(ConfigData.getControllerIp());
-			System.out.println(ConfigData.getControllerPort());
-			
+			Utils.initConfigDataIfNecessary(request);
+			checkAlreadyConnected(request);			
 			doWork(request, response);
 		}
 		catch(AlreadyConnectedException e) {
-			//Utils.fakeLog(e);
-			
-			try(FileOutputStream output = new FileOutputStream("debug.txt")) {
-				output.write((e.getMessage() + "\n").getBytes());
-			}
-			catch(Exception ex){}
-			
+			Utils.fakeLog(e);
 			request.getRequestDispatcher(ConfigData.getMainPage()).forward(request, response);
 		}
 		catch(HandshakeException e) {
-			//Utils.log(e);
-			
-			try(FileOutputStream output = new FileOutputStream("debug.txt")) {
-				output.write((e.getMessage() + "\n").getBytes());
-			}
-			catch(Exception ex){}
-			
+			Utils.fakeLog(e);
 			request.setAttribute(Utils.ERROR, e.getMessage());
 			request.getRequestDispatcher(ConfigData.getIndexPage()).forward(request, response);
 		}
 		catch(Exception e) {
-			//Utils.log(e);
-			
-			try(FileOutputStream output = new FileOutputStream("debug.txt")) {
-				output.write((e.getMessage() + "\n").getBytes());
-			}
-			catch(Exception ex){}
-			
+			Utils.log(e);
 			request.setAttribute(Utils.ERROR, "Internal error: " + e.getMessage());
 			request.getRequestDispatcher(ConfigData.getIndexPage()).forward(request, response);
 		}
-	}
-
-	private boolean initConfigData(HttpServletRequest request) {
-		InputStream input = request.getServletContext().getResourceAsStream("/view.json");
-		
-		return ConfigData.initConfigData(input);
 	}
 
 	private void checkAlreadyConnected(HttpServletRequest request) {		
