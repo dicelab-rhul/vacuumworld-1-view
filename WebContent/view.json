@@ -1,0 +1,10 @@
+{
+   "controller_ip":"127.0.0.1",
+   "controller_port":1890,
+   "logs_path":"logs/",
+   "default_location_image_path":"images/location.png",
+   "index_page":"index.jsp",
+   "main_page":"main.jsp",
+   "grid_page":"grid.jsp",
+   "timeout_in_seconds":100
+}

@@ -1,3 +1,4 @@
+<%@page import="uk.ac.rhul.cs.dice.vacuumworld.view.utils.Utils"%>
 <%@page import="uk.ac.rhul.cs.dice.vacuumworld.view.StateForView"%>
 <%@ page language="java" contentType="text/html; charset=US-ASCII"
     pageEncoding="US-ASCII"%>
@@ -12,29 +13,30 @@
 <script src="grid.js"></script>
 </head>
 <body>
+
 	<%
-		if(session.getAttribute("CONNECTED_FLAG") == null) {
+		if(session.getAttribute(Utils.CONNECTED_FLAG) == null) {
 			session = null;
 			%>
 				<jsp:forward page="index.jsp" />
 			<%
 		}
-		else if(session.getAttribute("TEMPLATE") == null) {
+		else if(session.getAttribute(Utils.TEMPLATE) == null) {
 			%>
 				<jsp:forward page="main.jsp" />
 			<%
 		}
-		else if(session.getAttribute("GRID") != null) {
-			String error = (String) request.getAttribute("ERROR");
+		else if(session.getAttribute(Utils.GRID) != null) {
+			String error = (String) request.getAttribute(Utils.ERROR);
 			
 			if(error != null) {
 				%>
 					<div class="centered_div">ERROR: <%=error%></div>
 				<%
-				session.removeAttribute("ERROR");
+				session.removeAttribute(Utils.ERROR);
 			}
 
-			StateForView state = (StateForView) session.getAttribute("GRID");
+			StateForView state = (StateForView) session.getAttribute(Utils.GRID);
 			int size = state.getWidth();
 			String[] imagesPaths = state.getGridImagesPaths();			
 			%>
@@ -61,9 +63,9 @@
 					</form>
 				</div>
 			<%
-			session.setAttribute("FIRST_CYCLE_DONE", true);
+			session.setAttribute(Utils.FIRST_CYCLE_DONE, true);
 		}
-		else if(session.getAttribute("GRID") == null) {
+		else if(session.getAttribute(Utils.GRID) == null) {
 			%>
 				<jsp:forward page="main.jsp" />
 			<%

@@ -1,6 +1,7 @@
 package uk.ac.rhul.cs.dice.vacuumworld.view.connection;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
@@ -13,8 +14,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import uk.ac.rhul.cs.dice.vacuumworld.view.session.ConnectionWithController;
-import uk.ac.rhul.cs.dice.vacuumworld.view.utils.HandshakeException;
+import uk.ac.rhul.cs.dice.vacuumworld.view.utils.ConfigData;
 import uk.ac.rhul.cs.dice.vacuumworld.view.utils.Utils;
+import uk.ac.rhul.cs.dice.vacuumworld.wvcommon.HandshakeException;
 
 @WebServlet("/connect")
 public class ConnectionServlet extends HttpServlet {
@@ -22,36 +24,56 @@ public class ConnectionServlet extends HttpServlet {
 
 	@Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		request.getRequestDispatcher("index.jsp").forward(request, response);
+		request.getRequestDispatcher(ConfigData.getIndexPage()).forward(request, response);
 	}
 	
 	@Override
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		try {
 			checkAlreadyConnected(request);
+			
+			if(!initConfigData(request)) {
+				throw new IllegalArgumentException("Could not parse configuration file.");
+			}
+			
+			System.out.println(ConfigData.getControllerIp());
+			System.out.println(ConfigData.getControllerPort());
+			
 			doWork(request, response);
 		}
 		catch(AlreadyConnectedException e) {
-			request.getRequestDispatcher("main.jsp").forward(request, response);
+			Utils.fakeLog(e);
+			
+			request.getRequestDispatcher(ConfigData.getMainPage()).forward(request, response);
 		}
 		catch(HandshakeException e) {
-			request.setAttribute("ERROR", e.getMessage());
-			request.getRequestDispatcher("index.jsp").forward(request, response);
+			Utils.log(e);
+			
+			request.setAttribute(Utils.ERROR, e.getMessage());
+			request.getRequestDispatcher(ConfigData.getIndexPage()).forward(request, response);
 		}
 		catch(Exception e) {
-			request.setAttribute("ERROR", "Internal error: " + e.getMessage());
-			request.getRequestDispatcher("index.jsp").forward(request, response);
+			Utils.log(e);
+			
+			request.setAttribute(Utils.ERROR, "Internal error: " + e.getMessage());
+			request.getRequestDispatcher(ConfigData.getIndexPage()).forward(request, response);
 		}
 	}
 
+	private boolean initConfigData(HttpServletRequest request) {
+		InputStream input = request.getServletContext().getResourceAsStream("/view.json");
+		
+		return ConfigData.initConfigData(input);
+	}
+
 	private void checkAlreadyConnected(HttpServletRequest request) {		
-		if(request.getSession().getAttribute("CONNECTED_FLAG") != null) {
+		if(request.getSession().getAttribute(Utils.CONNECTED_FLAG) != null) {
 			throw new AlreadyConnectedException();
 		}
 	}
 
 	private void doWork(HttpServletRequest request, HttpServletResponse response) throws IOException, HandshakeException, ServletException {
-		Socket socketWithController = new Socket(Utils.CONTROLLER_IP, Utils.CONTROLLER_PORT);
+		Socket socketWithController = new Socket(ConfigData.getControllerIp(), ConfigData.getControllerPort());
 		ObjectOutputStream output = new ObjectOutputStream(socketWithController.getOutputStream());
 		ObjectInputStream input = new ObjectInputStream(socketWithController.getInputStream());
 				
@@ -59,9 +81,9 @@ public class ConnectionServlet extends HttpServlet {
 			ConnectionWithController connection = new ConnectionWithController();
 			connection.setSocketWithController(socketWithController, output, input);
 			
-			request.getSession().setAttribute("CONNECTION", connection);
-			request.getSession().setAttribute("CONNECTED_FLAG", true);
-			request.getRequestDispatcher("main.jsp").forward(request, response);
+			request.getSession().setAttribute(Utils.CONNECTION, connection);
+			request.getSession().setAttribute(Utils.CONNECTED_FLAG, true);
+			request.getRequestDispatcher(ConfigData.getMainPage()).forward(request, response);
 		}
 	}
 }

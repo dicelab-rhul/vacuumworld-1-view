@@ -8,6 +8,7 @@ public class AvatarRepresentation extends ObjectRepresentation {
 	
 	public AvatarRepresentation(String id, String name, String color, int[] dimensions, String facingDirection) {
 		super(id);
+		
 		this.name = name;
 		this.color = color;
 		this.dimensions = dimensions;

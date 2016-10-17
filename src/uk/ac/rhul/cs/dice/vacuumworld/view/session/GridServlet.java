@@ -10,6 +10,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import uk.ac.rhul.cs.dice.vacuumworld.view.JsonParser;
 import uk.ac.rhul.cs.dice.vacuumworld.view.StateForView;
+import uk.ac.rhul.cs.dice.vacuumworld.view.utils.ConfigData;
 import uk.ac.rhul.cs.dice.vacuumworld.view.utils.Utils;
 import uk.ac.rhul.cs.dice.vacuumworld.wvcommon.ModelMessagesEnum;
 import uk.ac.rhul.cs.dice.vacuumworld.wvcommon.ModelUpdate;
@@ -22,7 +23,7 @@ public class GridServlet extends HttpServlet {
 
 	@Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		request.getRequestDispatcher("grid.jsp").forward(request, response);
+		request.getRequestDispatcher(ConfigData.getGridPage()).forward(request, response);
 	}
 
 	@Override
@@ -31,14 +32,12 @@ public class GridServlet extends HttpServlet {
 			sendRequest(request, response);
 		}
 		catch(Exception e) {
-			//ignore
+			Utils.log(e);
 		}
 	}
 
 	private void sendRequest(HttpServletRequest request, HttpServletResponse response) throws IOException, ClassNotFoundException {
-		String requestCode = request.getParameter("REQUEST_CODE");
-		
-		Utils.log(Utils.LOGS_PATH + "session.txt", "Received " + requestCode);
+		String requestCode = request.getParameter(Utils.REQUEST_CODE);
 		
 		if(requestCode != null) {
 			manageRequestCode(request, response, requestCode);
@@ -48,12 +47,9 @@ public class GridServlet extends HttpServlet {
 	private void manageRequestCode(HttpServletRequest request, HttpServletResponse response, String requestCode) throws IOException, ClassNotFoundException {
 		ViewRequestsEnum requestCodeEnum = ViewRequestsEnum.fromString(requestCode);
 		ViewRequest viewRequest = new ViewRequest(requestCodeEnum, null);
-		ConnectionWithController connection = (ConnectionWithController) request.getSession().getAttribute("CONNECTION");
-		Utils.log(Utils.LOGS_PATH + "session.txt", "Before sending the request");
+		ConnectionWithController connection = (ConnectionWithController) request.getSession().getAttribute(Utils.CONNECTION);
 		connection.getOutput().writeObject(viewRequest);
 		connection.getOutput().flush();
-		
-		Utils.log(Utils.LOGS_PATH + "session.txt", "Before getting the response");
 		
 		waitForResponse(request, response, requestCodeEnum, connection);
 	}
@@ -64,8 +60,6 @@ public class GridServlet extends HttpServlet {
 		}
 		else {
 			ModelUpdate update = (ModelUpdate) connection.getInput().readObject();
-			
-			Utils.log(Utils.LOGS_PATH + "session.txt", "After getting the response");
 			manageModelUpdate(update, request, response);
 		}
 	}
@@ -75,7 +69,7 @@ public class GridServlet extends HttpServlet {
 			manageStop(update, request, response);
 		}
 		else {
-			manageUpdate(update, request, response);
+			manageUpdate(update, response);
 		}
 	}
 	
@@ -89,19 +83,13 @@ public class GridServlet extends HttpServlet {
 		return ModelMessagesEnum.STOP_FORWARD.equals(update.getCode());
 	}
 
-	private void manageUpdate(ModelUpdate update, HttpServletRequest request, HttpServletResponse response) throws IOException {
+	private void manageUpdate(ModelUpdate update, HttpServletResponse response) throws IOException {
 		StateForView state = JsonParser.createStateDataForView(update);
-		
-		Utils.log(Utils.LOGS_PATH + "session.txt", "After parsing");
 		String data = "{ \"size\": " + state.getWidth() + ", \"images\": [" + getImagesList(state.getGridImagesPaths()) + "] }";
-		
-		Utils.log(Utils.LOGS_PATH + "session.txt", "Got " + data);
 		
 		response.setContentType("application/json");
 		response.getWriter().print(data);
 		response.getWriter().flush();
-		
-		Utils.log(Utils.LOGS_PATH + "session.txt", "Data sent to javascript");
 	}
 
 	private void stopSystem(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -110,8 +98,6 @@ public class GridServlet extends HttpServlet {
 		response.setContentType("text");
 		response.getWriter().print("stopped");
 		response.getWriter().flush();
-		
-		Utils.log(Utils.LOGS_PATH + "session.txt", "Data sent to javascript");
 	}
 
 	private String getImagesList(String[] gridImagesPaths) {
