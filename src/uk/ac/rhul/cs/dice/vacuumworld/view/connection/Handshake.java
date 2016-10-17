@@ -1,5 +1,6 @@
 package uk.ac.rhul.cs.dice.vacuumworld.view.connection;
 
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -26,6 +27,11 @@ public class Handshake {
 			return future.get(ConfigData.getTimeoutInSeconds(), TimeUnit.SECONDS);
 		}
 		catch (Exception e) {
+			try(FileOutputStream o = new FileOutputStream("debug.txt")) {
+				o.write((e.getMessage() + "\n").getBytes());
+			}
+			catch(Exception ex){}
+			
 			throw new HandshakeException(e);
 		}
 	}

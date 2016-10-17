@@ -1,5 +1,6 @@
 package uk.ac.rhul.cs.dice.vacuumworld.view.connection;
 
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
@@ -42,18 +43,33 @@ public class ConnectionServlet extends HttpServlet {
 			doWork(request, response);
 		}
 		catch(AlreadyConnectedException e) {
-			Utils.fakeLog(e);
+			//Utils.fakeLog(e);
+			
+			try(FileOutputStream output = new FileOutputStream("debug.txt")) {
+				output.write((e.getMessage() + "\n").getBytes());
+			}
+			catch(Exception ex){}
 			
 			request.getRequestDispatcher(ConfigData.getMainPage()).forward(request, response);
 		}
 		catch(HandshakeException e) {
-			Utils.log(e);
+			//Utils.log(e);
+			
+			try(FileOutputStream output = new FileOutputStream("debug.txt")) {
+				output.write((e.getMessage() + "\n").getBytes());
+			}
+			catch(Exception ex){}
 			
 			request.setAttribute(Utils.ERROR, e.getMessage());
 			request.getRequestDispatcher(ConfigData.getIndexPage()).forward(request, response);
 		}
 		catch(Exception e) {
-			Utils.log(e);
+			//Utils.log(e);
+			
+			try(FileOutputStream output = new FileOutputStream("debug.txt")) {
+				output.write((e.getMessage() + "\n").getBytes());
+			}
+			catch(Exception ex){}
 			
 			request.setAttribute(Utils.ERROR, "Internal error: " + e.getMessage());
 			request.getRequestDispatcher(ConfigData.getIndexPage()).forward(request, response);

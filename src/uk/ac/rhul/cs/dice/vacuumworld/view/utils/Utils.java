@@ -73,8 +73,8 @@ public class Utils {
 	}
 
 	public static void log(String message, Exception e) {
-		log(Level.SEVERE, e.getClass().getCanonicalName() + ": " + message, e);
-		log(Level.SEVERE, e.getClass().getCanonicalName() + ": " + e.getStackTrace(), e);
+		log(Level.INFO, e.getClass().getCanonicalName() + ": " + message);
+		//log(Level.SEVERE, e.getClass().getCanonicalName() + ": " + message, e);
 	}
 
 	public static void log(Level level, String message) {

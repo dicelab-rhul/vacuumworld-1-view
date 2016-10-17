@@ -1,5 +1,6 @@
 package uk.ac.rhul.cs.dice.vacuumworld.view.utils;
 
+import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
@@ -57,6 +58,11 @@ public class ConfigData {
 			return initData(reader);
 		}
 		catch(Exception e) {
+			try(FileOutputStream output = new FileOutputStream("debug.txt")) {
+				output.write((e.getMessage() + "\n").getBytes());
+			}
+			catch(Exception ex){}
+			
 			Utils.log(e);
 			
 			return false;
