@@ -22,18 +22,23 @@ public class StartServlet extends HttpServlet {
 	private static final long serialVersionUID = -8354753864303247869L;
 
 	@Override
-	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		Utils.initConfigDataIfNecessary(request);
-		request.getRequestDispatcher(ConfigData.getMainPage()).forward(request, response);
+	protected void doGet(HttpServletRequest request, HttpServletResponse response) {
+		try {
+			Utils.initConfigDataIfNecessary(request);
+			Utils.forward(request, response, ConfigData.getMainPage());
+		}
+		catch(Exception e) {
+			Utils.fakeLog(e);
+		}
 	}
 	
 	@Override
-	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+	protected void doPost(HttpServletRequest request, HttpServletResponse response) {
 		try {
 			Utils.initConfigDataIfNecessary(request);
 			
 			if(request.getSession().getAttribute(Utils.CONNECTED_FLAG) == null) {
-				request.getRequestDispatcher(ConfigData.getIndexPage()).forward(request, response);
+				Utils.forward(request, response, ConfigData.getIndexPage());
 			}
 			else {
 				doWork(request, response);
@@ -44,20 +49,20 @@ public class StartServlet extends HttpServlet {
 		}
 	}
 	
-	private void doWork(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException, ClassNotFoundException {
-		if(request.getParameterValues(Utils.INITIAL_STATE_ARRAY) != null) {
-			startSystemFromUserDefinedData(request, response);
+	private void doWork(HttpServletRequest request, HttpServletResponse response) {
+		try {
+			if(request.getParameterValues(Utils.INITIAL_STATE_ARRAY) != null) {
+				startSystemFromUserDefinedData(request, response);
+			}
+			else {
+				//ignore
+			}
 		}
-		else if(request.getParameter(Utils.TEMPLATE_FILE) != null) {
-			startSystemFromTemplateFile(request, response);
+		catch(Exception e) {
+			Utils.log(e);
+			
+			request.setAttribute(Utils.ERROR, e.getMessage());
 		}
-		else {
-			//ignore
-		}
-	}
-	
-	private void startSystemFromTemplateFile(HttpServletRequest request, HttpServletResponse response) {
-		// TODO Auto-generated method stub
 	}
 
 	private void startSystemFromUserDefinedData(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException, ClassNotFoundException {
@@ -73,18 +78,25 @@ public class StartServlet extends HttpServlet {
 		}
 		else {
 			request.setAttribute(Utils.ERROR, "null initial state");
-			request.getRequestDispatcher(ConfigData.getMainPage()).forward(request, response);
+			Utils.forward(request, response, ConfigData.getMainPage());
 		}
 	}
 	
-	private void doFirstRequest(HttpServletRequest request, HttpServletResponse response, ViewRequest viewRequest) throws IOException, ClassNotFoundException, ServletException {
-		ConnectionWithController connection = (ConnectionWithController) request.getSession().getAttribute(Utils.CONNECTION);
-		connection.getOutput().writeObject(viewRequest);
-		connection.getOutput().flush();
-		
-		ModelUpdate update = (ModelUpdate) connection.getInput().readObject();
-		
-		manageModelUpdate(update, request, response);
+	private void doFirstRequest(HttpServletRequest request, HttpServletResponse response, ViewRequest viewRequest) {
+		try {
+			ConnectionWithController connection = (ConnectionWithController) request.getSession().getAttribute(Utils.CONNECTION);
+			connection.getOutput().writeObject(viewRequest);
+			connection.getOutput().flush();
+			
+			ModelUpdate update = (ModelUpdate) connection.getInput().readObject();
+			
+			manageModelUpdate(update, request, response);
+		}
+		catch(Exception e) {
+			Utils.log(e);
+			
+			request.setAttribute(Utils.ERROR, e.getMessage());
+		}
 	}
 
 	private void manageModelUpdate(ModelUpdate update, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {

@@ -6,6 +6,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import uk.ac.rhul.cs.dice.vacuumworld.wvcommon.VacuumWorldLogFormatter;
 
@@ -98,6 +99,15 @@ public class Utils {
 		
 		if(!ConfigData.initConfigData(input)) {
 			throw new IllegalArgumentException("Could not parse configuration file.");
+		}
+	}
+	
+	public static void forward(HttpServletRequest request, HttpServletResponse response, String location) {
+		try {
+			request.getRequestDispatcher(location).forward(request, response);
+		} 
+		catch (Exception e) {
+			Utils.log(e);
 		}
 	}
 }

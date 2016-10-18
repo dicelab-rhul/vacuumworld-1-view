@@ -2,7 +2,6 @@ package uk.ac.rhul.cs.dice.vacuumworld.view.session;
 
 import java.io.IOException;
 
-import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -22,13 +21,18 @@ public class GridServlet extends HttpServlet {
 	private static final long serialVersionUID = -3078991556503103547L;
 
 	@Override
-	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		Utils.initConfigDataIfNecessary(request);
-		request.getRequestDispatcher(ConfigData.getGridPage()).forward(request, response);
+	protected void doGet(HttpServletRequest request, HttpServletResponse response) {
+		try {
+			Utils.initConfigDataIfNecessary(request);
+			Utils.forward(request, response, ConfigData.getGridPage());
+		}
+		catch(Exception e) {
+			Utils.fakeLog(e);
+		}
 	}
 
 	@Override
-	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+	protected void doPost(HttpServletRequest request, HttpServletResponse response) {
 		try {
 			Utils.initConfigDataIfNecessary(request);
 			sendRequest(request, response);

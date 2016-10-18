@@ -23,12 +23,17 @@ public class ConnectionServlet extends HttpServlet {
 
 	@Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		Utils.initConfigDataIfNecessary(request);
-		request.getRequestDispatcher(ConfigData.getIndexPage()).forward(request, response);
+		try {
+			Utils.initConfigDataIfNecessary(request);
+			Utils.forward(request, response, ConfigData.getIndexPage());
+		}
+		catch(Exception e) {
+			Utils.fakeLog(e);
+		}
 	}
 	
 	@Override
-	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+	protected void doPost(HttpServletRequest request, HttpServletResponse response) {
 		try {
 			Utils.initConfigDataIfNecessary(request);
 			checkAlreadyConnected(request);			
@@ -36,17 +41,17 @@ public class ConnectionServlet extends HttpServlet {
 		}
 		catch(AlreadyConnectedException e) {
 			Utils.fakeLog(e);
-			request.getRequestDispatcher(ConfigData.getMainPage()).forward(request, response);
+			Utils.forward(request, response, ConfigData.getMainPage());
 		}
 		catch(HandshakeException e) {
 			Utils.fakeLog(e);
 			request.setAttribute(Utils.ERROR, e.getMessage());
-			request.getRequestDispatcher(ConfigData.getIndexPage()).forward(request, response);
+			Utils.forward(request, response, ConfigData.getIndexPage());
 		}
 		catch(Exception e) {
 			Utils.log(e);
 			request.setAttribute(Utils.ERROR, "Internal error: " + e.getMessage());
-			request.getRequestDispatcher(ConfigData.getIndexPage()).forward(request, response);
+			Utils.forward(request, response, ConfigData.getIndexPage());
 		}
 	}
 
@@ -57,17 +62,22 @@ public class ConnectionServlet extends HttpServlet {
 	}
 
 	private void doWork(HttpServletRequest request, HttpServletResponse response) throws IOException, HandshakeException, ServletException {
-		Socket socketWithController = new Socket(ConfigData.getControllerIp(), ConfigData.getControllerPort());
-		ObjectOutputStream output = new ObjectOutputStream(socketWithController.getOutputStream());
-		ObjectInputStream input = new ObjectInputStream(socketWithController.getInputStream());
-				
-		if(Handshake.attemptHandshake(output, input)) {
+		try {
 			ConnectionWithController connection = new ConnectionWithController();
-			connection.setSocketWithController(socketWithController, output, input);
-			
-			request.getSession().setAttribute(Utils.CONNECTION, connection);
-			request.getSession().setAttribute(Utils.CONNECTED_FLAG, true);
-			request.getRequestDispatcher(ConfigData.getMainPage()).forward(request, response);
+			connection.setSocketWithController(new Socket(ConfigData.getControllerIp(), ConfigData.getControllerPort()));
+			ObjectOutputStream output = new ObjectOutputStream(connection.getSocketWithController().getOutputStream());
+			ObjectInputStream input = new ObjectInputStream(connection.getSocketWithController().getInputStream());
+					
+			if(Handshake.attemptHandshake(output, input)) {
+				connection.setSocketWithControllerIOStreams(output, input);
+				
+				request.getSession().setAttribute(Utils.CONNECTION, connection);
+				request.getSession().setAttribute(Utils.CONNECTED_FLAG, true);
+				Utils.forward(request, response, ConfigData.getMainPage());
+			}
+		}
+		catch(Exception e) {
+			Utils.log(e);
 		}
 	}
 }

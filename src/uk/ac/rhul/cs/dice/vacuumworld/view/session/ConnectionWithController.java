@@ -16,8 +16,11 @@ public class ConnectionWithController implements Serializable {
 		this.sessionRequested = true;
 	}
 	
-	public void setSocketWithController(Socket socket, ObjectOutputStream output, ObjectInputStream input) {
+	public void setSocketWithController(Socket socket) {
 		this.socketWithController = socket;
+	}
+	
+	public void setSocketWithControllerIOStreams(ObjectOutputStream output, ObjectInputStream input) {
 		this.input = input;
 		this.output = output;
 	}
