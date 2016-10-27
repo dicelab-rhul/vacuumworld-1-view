@@ -70,8 +70,7 @@ public class JsonParser {
 			return getImagePathFromAgent(color, direction);
 		}
 		else if(location.containsKey(Utils.USER)) {
-			JsonObject user = location.getJsonObject(Utils.USER);
-			String direction = user.getString(Utils.FACING_DIRECTION);
+			String direction = location.getString(Utils.USER);
 			
 			return getImagePathFromUser(direction);
 		}

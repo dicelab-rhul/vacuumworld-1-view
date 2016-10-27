@@ -1,6 +1,5 @@
 package uk.ac.rhul.cs.dice.vacuumworld.view.session.requests;
 
-import java.io.FileOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -11,7 +10,6 @@ import javax.json.JsonArray;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
-import javax.json.JsonWriter;
 import javax.servlet.http.HttpServletRequest;
 
 import uk.ac.rhul.cs.dice.vacuumworld.view.representation.AgentRepresentation;
@@ -87,7 +85,6 @@ public class ViewRequestConcreteFactory implements ViewRequestsVisitorInterface 
 		}
 		
 		JsonObject initialState = createTemplate(gridSize, gridSize, locationsList, user, monitoring);
-		dumpJson(initialState);
 		
 		return new ViewRequest(code, initialState.toString());
 	}
@@ -100,15 +97,6 @@ public class ViewRequestConcreteFactory implements ViewRequestsVisitorInterface 
 				String[] info = location.split("\\|");
 				locationsList.add(parseLocation(info));
 			}
-		}
-	}
-
-	private static void dumpJson(JsonObject initialState) {
-		try(JsonWriter writer = Json.createWriter(new FileOutputStream("logs/initial_state_view.json"))) {
-			writer.write(initialState);
-		}
-		catch(Exception e) {
-			Utils.log(e);
 		}
 	}
 
