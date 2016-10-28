@@ -2,9 +2,19 @@ var clicked = null;
 
 $(document).ready(function() {
 	$(function() {
+		createErrorDialog();
 		listenForNewSimulationRequest();
 	});
 });
+
+function createErrorDialog() {
+	$("#error_dialog").dialog({
+		autoOpen: false,
+		modal: true,
+		dialogClass: "no-close",
+		title: "Error"
+	})
+}
 
 function listenForNewSimulationRequest() {
 	$("#new_simulation_button").on("click", function() {
@@ -30,11 +40,15 @@ function listenForGridSizeOkButton() {
 		$("#new_simulation").dialog("close");
 		
 		if(!validateForm("grid_size","grid_size")) {
-			alert("The size must be an integer > 0 and <= 10");
+			$("#error_message").html("The size must be an integer > 0 and <= 10");
+			$("#error_dialog").dialog("open");
+			listenForErrorOkButton();
 		}
 		else {
 			if(!positiveInteger("grid_size", "grid_size")) {
-				alert("The size must be an integer > 0 and <= 10");
+				$("#error_message").html("The size must be an integer > 0 and <= 10");
+				$("#error_dialog").dialog("open");
+				listenForErrorOkButton();
 			}
 			else {
 				createUserAndMonitoringDialog();
@@ -44,6 +58,15 @@ function listenForGridSizeOkButton() {
 				return false;
 			}
 		}
+	});
+}
+
+function listenForErrorOkButton() {
+	$("#error_ok_button").on("click", function() {
+		$("#error_message").html("");
+		$("#error_dialog").dialog("close");
+		
+		return false;
 	});
 }
 
@@ -155,7 +178,10 @@ function listenForCancelAddAgentOrDirt() {
 function listenForAddAgentsOkButton() {
 	$("#add_agents_ok_button").on("click", function() {
 		if(noAgents()) {
-			alert("Add at least one agent!!!");
+			$("#error_message").html("Add at least one agent!!!");
+			$("#error_dialog").dialog("open");
+			listenForErrorOkButton();
+			
 			return false;
 		}		
 		

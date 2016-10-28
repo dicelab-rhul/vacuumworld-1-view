@@ -17,6 +17,15 @@
 </head>
 <body>
 
+<div id="error_dialog" class="dialog">
+	<form action="" method="post">
+		<div class="centered_div">
+			<p id="error_message"></p>
+			<input type="submit" value="Ok" id="error_ok_button">
+		</div>
+	</form>
+</div>
+
 <%
 	if(session.getAttribute(Utils.TEMPLATE) != null) {
 		%>

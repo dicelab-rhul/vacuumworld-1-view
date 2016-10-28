@@ -45,17 +45,13 @@ public class Utils {
 	private static Logger initLogger() {
 		Logger logger = Logger.getAnonymousLogger();
 		logger.setUseParentHandlers(false);
-		VacuumWorldLogFormatter formatter = new VacuumWorldLogFormatter();
 		ConsoleHandler handler = new ConsoleHandler();
-		handler.setFormatter(formatter);
-		handler.setLevel(Level.INFO);
+		handler.setFormatter(new VacuumWorldLogFormatter());
+		handler.setLevel(Level.ALL);
 		logger.addHandler(handler);
+		logger.setLevel(Level.ALL);
 		
 		return logger;
-	}
-	
-	public static void log(String message) {
-		log(Level.INFO, message);
 	}
 	
 	public static void log(Exception e) {
@@ -75,11 +71,11 @@ public class Utils {
 	}
 
 	public static void log(String message, Exception e) {
-		log(Level.INFO, e.getClass().getCanonicalName() + ": " + message);
+		log(e.getClass().getCanonicalName() + ": " + message);
 	}
 
-	public static void log(Level level, String message) {
-		Utils.LOGGER.log(level, message);
+	public static void log(String message) {
+		Utils.LOGGER.log(Level.FINE, message);
 	}
 
 	public static void log(Level level, String message, Exception e) {

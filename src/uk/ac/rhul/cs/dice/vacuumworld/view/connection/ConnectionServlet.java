@@ -67,16 +67,24 @@ public class ConnectionServlet extends HttpServlet {
 			connection.setSocketWithController(new Socket(ConfigData.getControllerIp(), ConfigData.getControllerPort()));
 			ObjectOutputStream output = new ObjectOutputStream(connection.getSocketWithController().getOutputStream());
 			ObjectInputStream input = new ObjectInputStream(connection.getSocketWithController().getInputStream());
+			
+			Utils.logWithClass(getClass().getSimpleName(), "Connected with (presumably the Controller server) " + connection.getSocketWithController().getInetAddress().getHostAddress() + ":" + connection.getSocketWithController().getPort() + ".");
 					
 			if(Handshake.attemptHandshake(output, input)) {
 				connection.setSocketWithControllerIOStreams(output, input);
+				
+				Utils.logWithClass(this.getClass().getSimpleName(), "Handshake with Controller and Model succesfully completed.");
 				
 				request.getSession().setAttribute(Utils.CONNECTION, connection);
 				request.getSession().setAttribute(Utils.CONNECTED_FLAG, true);
 				Utils.forward(request, response, ConfigData.getMainPage());
 			}
+			else {
+				Utils.logWithClass(this.getClass().getSimpleName(), "Error during handshake. Aborting...");
+			}
 		}
 		catch(Exception e) {
+			Utils.logWithClass(this.getClass().getSimpleName(), "Error during handshake. Aborting...");
 			Utils.log(e);
 		}
 	}
