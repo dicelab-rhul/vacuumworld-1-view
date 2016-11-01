@@ -17,15 +17,6 @@
 </head>
 <body>
 
-<div id="error_dialog" class="dialog">
-	<form action="" method="post">
-		<div class="centered_div">
-			<p id="error_message"></p>
-			<input type="submit" value="Ok" id="error_ok_button">
-		</div>
-	</form>
-</div>
-
 <%
 	if(session.getAttribute(Utils.TEMPLATE) != null) {
 		%>
@@ -56,32 +47,34 @@
 				</div>
 			</div>
 			
-			<div id="new_simulation" class="dialog">
+			<div id="select_size_dialog" class="dialog">
 				<form name="grid_size" id="grid_size_form" action="" method="post">
 					<input type="text" name="grid_size" id="grid_size" /><br /> <br />
 					<input type="submit" value="Next" id="grid_size_ok_button">
-					<input type="submit" value="Cancel">
+					<input type="submit" value="Cancel" id="grid_size_cancel_button">
 				</form>
 			</div>
 			
-			<div id="new_simulation_2" class="dialog">
-				<form name="monitoring_choices_1" action="" method="post">
+			<div id="user_choice_dialog" class="dialog">
+				<form name="user_choice" id="user_choice" action="" method="post">
 					<input type="checkbox" id="user_present" name="user_present" value="t1" checked="checked"/> Add random walking user<br />
 					<input type="checkbox" id="monitoring_active" name="monitoring_active" value="t2" /> Activate monitoring<br /> <br />
 					<input type="submit" value="Next" id="user_and_monitoring_ok_button">
-					<input type="submit" value="Cancel">
+					<input type="submit" value="Cancel" id="user_and_monitoring_cancel_button">
 				</form>
 			</div>
 			
-			<div id="new_simulation_3" class="dialog">
+			<div id="add_agents_or_dirts_dialog" class="dialog">
 				<div id="dialog_grid" class="centered_div"></div>
-				<form name="monitoring_choices_2" id="monitoring_choices_2" action="" method="post">
-					<input type="submit" value="Next" id="add_agents_ok_button">
-					<input type="submit" value="Cancel">
+				<form name="add_agents_or_dirts" id="add_agents_or_dirts" action="" method="post">
+					<div class="centered_div">
+						<input type="submit" value="Next" id="add_agents_ok_button">
+						<input type="submit" value="Cancel" id="add_agents_cancel_button">
+					</div>
 				</form>
 			</div>
 			
-			<div id="new_simulation_4" class="dialog">
+			<div id="add_agent_or_dirt_dialog" class="dialog">
 				<div id="agent_or_dirt_choices" class="radio_choices">
 					<form action="" method="post">
 						<input type="radio" name="agent_or_dirt" value="green_north" checked="checked" /> Green agent facing North<br />
@@ -98,22 +91,23 @@
 						<input type="radio" name="agent_or_dirt" value="white_east" /> White agent facing East<br />
 						<input type="radio" name="agent_or_dirt" value="green_dirt" /> Green dirt<br />
 						<input type="radio" name="agent_or_dirt" value="orange_dirt" /> Orange dirt<br />
+						<input type="radio" name="agent_or_dirt" value="location" /> Empty location<br />
 						<br />
 						<div class="centered_div">
-							<input type="button" value="Add" id="add_agent_or_dirt_button"/>
-							<input type="button" value="Cancel" id="cancel_add_agent_or_dirt"/>
+							<input type="button" value="Add" id="add_agent_or_dirt_ok_button"/>
+							<input type="button" value="Cancel" id="add_agent_or_dirt_cancel_button"/>
 						</div>
 					</form>
 				</div>
 			</div>
 			
-			<div id="new_simulation_5" class="dialog">
+			<div id="recap_dialog" class="dialog">
 				<form action="" method="post">
 					<div class="centered_div">
 						<p>OK to proceed, Save to store the template, Cancel to abort.</p>
 						<input type="button" value="Ok" id="recap_ok_button" />
 						<input type="button" value="Save Template" id="recap_save_button" />
-						<input type="button" value="Cancel" onclick="resetNewTemplateSelection()"/>
+						<input type="button" value="Cancel" id="recap_cancel_button"/>
 					</div>
 				</form>
 			</div>

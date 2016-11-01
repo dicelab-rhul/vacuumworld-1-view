@@ -1,33 +1,88 @@
 var clicked = null;
 
-$(document).ready(function() {
-	$(function() {
-		createErrorDialog();
-		listenForNewSimulationRequest();
-	});
-});
+$(document).ready(setupEnvironment);
+
+function setupEnvironment() {
+	listenForNewSimulationButton();
+}
 
 function createErrorDialog() {
-	$("#error_dialog").dialog({
+	createErrorDialogHelper();
+	listenForClickOnErrorDialogOkButton();
+}
+
+function listenForClickOnErrorDialogOkButton() {
+	$("#error_ok_button").on("click", manageClickOnErrorOkButton);
+}
+
+function manageClickOnErrorOkButton() {
+	$("#error_dialog").empty();
+	$("#error_dialog").remove();
+}
+
+function destroyDialogIfPresent(id) {
+	if($(id).hasClass('ui-dialog-content')) {
+		$(id).setVisible(false);
+		$(id).dialog("destroy");
+	}
+}
+
+function createErrorDialogHelper() {	
+	var errorDiv = createErrorDiv();
+	createDialogFromErrorDiv(errorDiv);
+}
+
+function createErrorDiv() {
+	var errorDiv = $("<div id=\"error_dialog\" class=\"dialog\">");
+	
+	errorDiv.append("<form action=\"\" method=\"post\"></form>");
+	errorDiv.append("<div class=\"centered_div\">");
+	errorDiv.append("<p id=\"error_message\"></p>");
+	errorDiv.append("<input type=\"submit\" value=\"Ok\" id=\"error_ok_button\">");
+	errorDiv.append("</div>");
+	errorDiv.append("</form>");
+	errorDiv.append("</div>");
+	
+	return errorDiv;
+}
+
+function createDialogFromErrorDiv(errorDiv) {
+	errorDiv.dialog({
 		autoOpen: false,
 		modal: true,
 		dialogClass: "no-close",
 		title: "Error"
-	})
-}
-
-function listenForNewSimulationRequest() {
-	$("#new_simulation_button").on("click", function() {
-		createGridSizeDialog();
-		$("#new_simulation").dialog("open");
-		listenForGridSizeOkButton();
-		
-		return false;
 	});
 }
 
+function listenForNewSimulationButton() {
+	$("#new_simulation_button").on("click", createAndShowGridSizeDialog);
+}
+
+function createAndShowGridSizeDialog() {
+	createGridSizeDialog();
+	$("#select_size_dialog").dialog("open");
+	
+	return false;
+}
+
 function createGridSizeDialog() {
-	$("#new_simulation").dialog({
+	//destroyDialogIfPresent("#select_size_dialog");
+	createGridSizeDialogHelper();
+	listenForGridSizeOkButton();
+	listenForGridSizeCancelButton();
+}
+
+function listenForGridSizeCancelButton() {
+	$("#grid_size_cancel_button").on("click", manageClickOnGridSizeCancelButton);
+}
+
+function manageClickOnGridSizeCancelButton() {
+	destroyDialogIfPresent("#select_size_dialog");
+}
+
+function createGridSizeDialogHelper() {
+	$("#select_size_dialog").dialog({
 		autoOpen: false,
 		modal: true,
 		dialogClass: "no-close",
@@ -36,42 +91,64 @@ function createGridSizeDialog() {
 }
 
 function listenForGridSizeOkButton() {
-	$("#grid_size_ok_button").on("click", function() {
-		$("#new_simulation").dialog("close");
-		
-		if(!validateForm("grid_size","grid_size")) {
-			$("#error_message").html("The size must be an integer > 0 and <= 10");
-			$("#error_dialog").dialog("open");
-			listenForErrorOkButton();
-		}
-		else {
-			if(!positiveInteger("grid_size", "grid_size")) {
-				$("#error_message").html("The size must be an integer > 0 and <= 10");
-				$("#error_dialog").dialog("open");
-				listenForErrorOkButton();
-			}
-			else {
-				createUserAndMonitoringDialog();
-				$("#new_simulation_2").dialog("open");
-				listenForUserAndMonitoringOkButton();
-				
-				return false;
-			}
-		}
-	});
+	$("#grid_size_ok_button").on("click", manageClickOnGridSizeOkButton);
 }
 
-function listenForErrorOkButton() {
-	$("#error_ok_button").on("click", function() {
-		$("#error_message").html("");
-		$("#error_dialog").dialog("close");
+function manageClickOnGridSizeOkButton() {
+	$("#select_size_dialog").dialog("close");
+	
+	if(!validateForm("grid_size", "grid_size")) {
+		manageEmptySizeTextboxError();
 		
 		return false;
-	});
+	}
+	else if(!positiveInteger("grid_size", "grid_size")) {
+		manageInvalidContentInSizeTextboxError();
+		
+		return false;
+	}
+	else {
+		createUserAndMonitoringDialog();
+		$("#user_choice_dialog").dialog("open");
+		
+		return false;
+	}
+}
+
+function manageEmptySizeTextboxError() {
+	showError("The size must be an integer > 0 and <= 10");
+}
+
+function manageInvalidContentInSizeTextboxError() {
+	showError("The size must be an integer > 0 and <= 10");
+}
+
+function showError(text) {
+	createErrorDialog();
+	$("#error_message").html(text);
+	$("#error_dialog").dialog("open");
+	
+	return false;
 }
 
 function createUserAndMonitoringDialog() {
-	$("#new_simulation_2").dialog({
+	destroyDialogIfPresent("#user_choice_dialog");
+	createUserAndMonitoringDialogHelper();
+	listenForUserAndMonitoringOkButton();
+	listenForUserAndMonitoringCancelButton();
+}
+
+function listenForUserAndMonitoringCancelButton() {
+	$("#user_and_monitoring_cancel_button").on("click", manageClickOnUserAndMonitoringCancelButton);
+}
+
+function manageClickOnUserAndMonitoringCancelButton() {
+	destroyDialogIfPresent("#select_size_dialog");
+	destroyDialogIfPresent("#user_choice_dialog");
+}
+
+function createUserAndMonitoringDialogHelper() {
+	$("#user_choice_dialog").dialog({
 		autoOpen: false,
 		modal: true,
 		dialogClass: "no-close",
@@ -80,23 +157,30 @@ function createUserAndMonitoringDialog() {
 }
 
 function listenForUserAndMonitoringOkButton() {
-	$("#user_and_monitoring_ok_button").on("click", function() {
-		$("#new_simulation_2").dialog("close");
-		
-		var size = document.forms["grid_size"]["grid_size"].value;
-		createGridDialog(size);
-		populateGridDialog(size);
-		
-		$("#dialog_grid").append("<br />");
-		$("#new_simulation_3").dialog("open");
-		listenForAddAgentsOkButton();
-		
-		return false;
-	});
+	$("#user_and_monitoring_ok_button").on("click", manageClickOnUserAndMonitoringOkButton);
+}
+
+function manageClickOnUserAndMonitoringOkButton() {
+	$("#user_choice_dialog").dialog("close");
+	var size = document.forms["grid_size"]["grid_size"].value;
+	createGridDialog(size);
+	populateGridDialog(size);
+	$("#add_agents_or_dirts_dialog").dialog("open");
+	
+	return false;
 }
 
 function createGridDialog(size) {
-	$("#new_simulation_3").dialog({
+	destroyDialogIfPresent("#add_agents_or_dirts_dialog");
+	createGridDialogHelper(size);
+	listenForAddAgentsOkButton();
+	listenForAddAgentsCancelButton();
+	
+	return size;
+}
+
+function createGridDialogHelper(size) {
+	$("#add_agents_or_dirts_dialog").dialog({
 		autoOpen: false,
 		modal: true,
 		dialogClass: "no-close",
@@ -107,93 +191,106 @@ function createGridDialog(size) {
 }
 
 function populateGridDialog(size) {
-	$("#dialog_grid").empty();
-	
-	createAddAgentOrDirtDialog();
-	
 	for(var i = 0; i < size; i++) {		
 		for(var j = 0; j < size; j++) {
-			var y = i+1, x = j+1;
-			var id = "image_" + x + "_" + y;
-			$("#dialog_grid").append("<img id=\"" + id + "\" class=\"grid_image\" src=\"images/location.png\" />");
-			addClickListener(id);
+			setupLocationImage(i, j);
 		}
+		
 		$("#dialog_grid").append("<br />");
 	}
+	
+	$("#dialog_grid").append("<br />");
 }
 
-function addClickListener(id) {
-	$("#" + id).on("click", function() {
-		clicked = id;
-		$("#new_simulation_4").dialog("open");
-		listenForAddAgentOrDirt(id);
-		listenForCancelAddAgentOrDirt();
-	});
+function setupLocationImage(i, j) {
+	var y = i+1, x = j+1;
+	var id = "image_" + x + "_" + y;
+	$("#dialog_grid").append("<img id=\"" + id + "\" class=\"grid_image\" src=\"images/location.png\" />");
+	$("#" + id).on("click", {id: id}, manageClickOnLocationImage);
+}
+
+function manageClickOnLocationImage(event) {
+	clicked = event.data.id;
+	resumeOrRecreateAddAgentOrDirtDialog();
+	listenForAddAgentOrDirtOkButton(event.data.id);
+	listenForAddAgentOrDirtCancelButton();
+	
+	return false;
+}
+
+function resumeOrRecreateAddAgentOrDirtDialog() {
+	if(!$("#add_agent_or_dirt").hasClass('ui-dialog-content')) {
+		createAddAgentOrDirtDialog();
+	}
+	
+	$("#add_agent_or_dirt_dialog").dialog("open");
 }
 
 function createAddAgentOrDirtDialog() {
-	if(!$("#new_simulation_4").hasClass('ui-dialog-content')) {
-		$("#new_simulation_4").dialog({
-			autoOpen: false,
-			modal: true,
-			dialogClass: "no-close",
-			title: "Choose an agent or dirt type",
-			width: "400",
-		});
-	}
-}
-
-function listenForAddAgentOrDirt(id) {
-	$("#add_agent_or_dirt_button").on("click", function() {
-		if(clicked === id) {
-			var choice = $('input:radio[name=agent_or_dirt]:checked').val();
-			var newImage = getNewImagePath(choice);
-			$("#" + id).attr("src", newImage);
-			closeAgentOrDirtSelectionDialog();
-			clicked = null;
-		}
-		
-		return false;
+	$("#add_agent_or_dirt_dialog").dialog({
+		autoOpen: false,
+		modal: true,
+		dialogClass: "no-close",
+		title: "Choose an agent or dirt type",
+		width: "400",
 	});
 }
 
-function getNewImagePath(choice) {
-	return "images/" + choice + ".png"
+function listenForAddAgentOrDirtOkButton(id) {
+	$("#add_agent_or_dirt_ok_button").on("click", {id: id}, manageClickOnAddAgentOrDirtOkButton);
 }
 
-function closeAgentOrDirtSelectionDialog() {
-	$("#new_simulation_4").dialog("destroy");
-	createAddAgentOrDirtDialog();
-}
-
-function listenForCancelAddAgentOrDirt() {
-	$("#cancel_add_agent_or_dirt").on("click", function() {
-		closeAgentOrDirtSelectionDialog();
+function manageClickOnAddAgentOrDirtOkButton(event) {
+	if(clicked === event.data.id) {
+		var choice = $('input:radio[name=agent_or_dirt]:checked').val();
+		var newImage = "images/" + choice + ".png";
+		$("#" + event.data.id).attr("src", newImage);
 		clicked = null;
-		
-		return false;
-	})
+	}
+	
+	$("#add_agent_or_dirt_dialog").dialog("close");
+	
+	return false;
+}
+
+function listenForAddAgentOrDirtCancelButton() {
+	$("#add_agent_or_dirt_cancel_button").on("click", manageClickOnAddAgentOrDirtCancelButton);
+}
+
+function manageClickOnAddAgentOrDirtCancelButton() {
+	$("#add_agent_or_dirt_dialog").dialog("close");
+	clicked = null;
+	
+	return false;
 }
 
 function listenForAddAgentsOkButton() {
-	$("#add_agents_ok_button").on("click", function() {
-		if(noAgents()) {
-			$("#error_message").html("Add at least one agent!!!");
-			$("#error_dialog").dialog("open");
-			listenForErrorOkButton();
-			
-			return false;
-		}		
-		
-		$("#new_simulation_3").dialog("close");
-		
-		createNewTemplateRecapDialog();
-		$("#new_simulation_5").dialog("open");
-		listenForRecapOkButton();
-		listenForRecapSaveButton();
+	$("#add_agents_ok_button").on("click", manageClickOnAddAgentsOkButton);
+}
+
+function listenForAddAgentsCancelButton() {
+	$("#add_agents_cancel_button").on("click", manageClickOnAddAgentsCancelButton);
+}
+
+function manageClickOnAddAgentsCancelButton() {
+	destroyDialogIfPresent("#select_size_dialog");
+	destroyDialogIfPresent("#user_choice_dialog");
+	destroyDialogIfPresent("#add_agents_or_dirt_dialog");
+}
+
+function manageClickOnAddAgentsOkButton() {
+	if(noAgents()) {
+		manageNoAgentsAddedError();
 		
 		return false;
-	});
+	}
+	else {
+		$("#add_agents_or_dirts_dialog").dialog("close");
+		createNewTemplateRecapDialog();
+		$("#recap_dialog").dialog("open");
+		
+		return false;
+	}
 }
 
 function noAgents() {
@@ -214,8 +311,22 @@ function noAgents() {
 	return true;
 }
 
+function manageNoAgentsAddedError() {
+	showError("Add at least one agent!!!");
+	
+	return false;
+}
+
 function createNewTemplateRecapDialog() {
-	$("#new_simulation_5").dialog({
+	destroyDialogIfPresent("#recap_dialog");
+	createNewTemplateRecapDialogHelper();
+	listenForRecapOkButton();
+	listenForRecapSaveButton();
+	listenForRecapCancelButton();
+}
+
+function createNewTemplateRecapDialogHelper() {
+	$("#recap_dialog").dialog({
 		autoOpen: false,
 		modal: true,
 		dialogClass: "no-close",
@@ -225,48 +336,34 @@ function createNewTemplateRecapDialog() {
 }
 
 function listenForRecapOkButton() {
-	$("#recap_ok_button").on("click", function() {
-		$("#new_simulation_5").dialog("close");
-		
-		collectDataAndStartSystem();
-		
-		return false;
-	});
+	$("#recap_ok_button").on("click", manageClickOnRecapOkButton);
 }
 
 function listenForRecapSaveButton() {
-	$("#recap_save_button").on("click", function() {
-		var toSave = collectData();
-		var tmp = "";
-		
-		for(var i=0; i< toSave.length; i++) {
-			tmp += toSave[i];
-			
-			if(i != toSave.length - 1) {
-				tmp += "@";
-			}
-		}
-		
-		var filename = randomString(20) + ".txt";
-		download(filename, tmp);
-		return false;
-	});
+	$("#recap_save_button").on("click", manageClickOnRecapSaveButton);
 }
 
-function resetNewTemplateSelection() {
-	$("#dialog_grid").empty();
-	
-	document.getElementById("grid_size_form").reset();
-	
-	$("#new_simulation").dialog("destroy");
-	$("#new_simulation_2").dialog("destroy");
-	$("#new_simulation_3").dialog("destroy");
-	
-	if ($('#new_simulation_4').hasClass('ui-dialog-content')) {
-		$("#new_simulation_4").dialog("destroy");
-	}
+function listenForRecapCancelButton() {
+	$("#recap_cancel_button").on("click", manageClickOnRecapCancelButton);
+}
 
-	$("#new_simulation_5").dialog("destroy");
+function manageClickOnRecapCancelButton() {
+	destroyDialogIfPresent("#select_size_dialog");
+	destroyDialogIfPresent("#user_choice_dialog");
+	destroyDialogIfPresent("#add_agents_or_dirt_dialog");
+	destroyDialogIfPresent("#add_agent_or_dirt_dialog");
+	destroyDialogIfPresent("#recap_dialog");
+}
+
+function manageClickOnRecapSaveButton() {
+	showError("Not yet implemented!!!");
+}
+
+function manageClickOnRecapOkButton() {
+	$("#recap_dialog").dialog("close");
+	collectDataAndStartSystem();
+	
+	return false;
 }
 
 function collectDataAndStartSystem() {
@@ -291,15 +388,21 @@ function buildNotableLocations(size) {
 	
 	for(var i = 0; i < size; i++) {		
 		for(var j = 0; j < size; j++) {
-			var x = i+1, y = j+1;
-			var id = "image_" + x + "_" + y;
-			
-			var candidate = buildLocationIfNecessary(x, y, id);
-			
-			if(candidate != null) {
-				locations += (locations === "" ? candidate : "#" + candidate);
-			}
+			locations = buildNotableLocationIfNecessary(i, j, locations);
 		}
+	}
+	
+	return locations;
+}
+
+function buildNotableLocationIfNecessary(i, j, locations) {
+	var x = i+1, y = j+1;
+	var id = "image_" + x + "_" + y;
+	
+	var candidate = buildLocationIfNecessary(x, y, id);
+	
+	if(candidate != null) {
+		locations += (locations === "" ? candidate : "#" + candidate);
 	}
 	
 	return locations;
@@ -372,23 +475,4 @@ function createNotableLocationWithDirt(x, y, name) {
 	else {
 		return null;
 	}
-}
-
-function randomString(length) {
-    var text = "";
-    var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-    for(var i = 0; i < length; i++) {
-        text += possible.charAt(Math.floor(Math.random() * possible.length));
-    }
-    return text;
-}
-
-function download(filename, text) {
-	var element = document.createElement('a');
-	element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
-	element.setAttribute('download', filename);
-	element.style.display = 'none';
-	document.body.appendChild(element);
-	element.click();
-	document.body.removeChild(element);
 }

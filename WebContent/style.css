@@ -11,6 +11,8 @@
 
 .dialog {
 	display: none;
+	text-align: center;
+	margin: auto;
 }
 
 .radio_choices {
@@ -43,16 +45,6 @@
 }
 
 #load_file {
-	text-align: center;
-	margin: auto;
-}
-
-#new_simulation {
-	text-align: center;
-	margin: auto;
-}
-
-#new_simulation_3 {
 	text-align: center;
 	margin: auto;
 }
