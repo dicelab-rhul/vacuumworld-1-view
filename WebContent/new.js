@@ -1,4 +1,9 @@
-var clicked = null;
+var initialState = [];
+var gridSizeDialog = null;
+var userDialog = null;
+var gridDialog = null;
+var addBodyDialog = null;
+var recapDialog = null;
 
 $(document).ready(setupEnvironment);
 
@@ -6,83 +11,31 @@ function setupEnvironment() {
 	listenForNewSimulationButton();
 }
 
-function createErrorDialog() {
-	createErrorDialogHelper();
-	listenForClickOnErrorDialogOkButton();
-}
-
-function listenForClickOnErrorDialogOkButton() {
-	$("#error_ok_button").on("click", manageClickOnErrorOkButton);
-}
-
-function manageClickOnErrorOkButton() {
-	$("#error_dialog").empty();
-	$("#error_dialog").remove();
-}
-
-function destroyDialogIfPresent(id) {
-	if($(id).hasClass('ui-dialog-content')) {
-		$(id).setVisible(false);
-		$(id).dialog("destroy");
-	}
-}
-
-function createErrorDialogHelper() {	
-	var errorDiv = createErrorDiv();
-	createDialogFromErrorDiv(errorDiv);
-}
-
-function createErrorDiv() {
-	var errorDiv = $("<div id=\"error_dialog\" class=\"dialog\">");
-	
-	errorDiv.append("<form action=\"\" method=\"post\"></form>");
-	errorDiv.append("<div class=\"centered_div\">");
-	errorDiv.append("<p id=\"error_message\"></p>");
-	errorDiv.append("<input type=\"submit\" value=\"Ok\" id=\"error_ok_button\">");
-	errorDiv.append("</div>");
-	errorDiv.append("</form>");
-	errorDiv.append("</div>");
-	
-	return errorDiv;
-}
-
-function createDialogFromErrorDiv(errorDiv) {
-	errorDiv.dialog({
-		autoOpen: false,
-		modal: true,
-		dialogClass: "no-close",
-		title: "Error"
-	});
-}
-
 function listenForNewSimulationButton() {
-	$("#new_simulation_button").on("click", createAndShowGridSizeDialog);
+	$("#new_simulation_button").on("click", manageClickOnNewSimulationButton);
 }
 
-function createAndShowGridSizeDialog() {
-	createGridSizeDialog();
-	$("#select_size_dialog").dialog("open");
-	
-	return false;
+function manageClickOnNewSimulationButton() {
+	initialState = [];
+	destroyLeftovers();
+	gridSizeDialog = createGridSizeDialog();
+	gridSizeDialog.dialog("open");
+	listenToGridSizeOkButton();
+	listenToGridSizeCancelButton();
+}
+
+function destroyLeftovers() {
+	gridSizeDialog = null;
+	userDialog = null;
+	gridDialog = null;
+	addBodyDialog = null;
+	recapDialog = null;
 }
 
 function createGridSizeDialog() {
-	//destroyDialogIfPresent("#select_size_dialog");
-	createGridSizeDialogHelper();
-	listenForGridSizeOkButton();
-	listenForGridSizeCancelButton();
-}
-
-function listenForGridSizeCancelButton() {
-	$("#grid_size_cancel_button").on("click", manageClickOnGridSizeCancelButton);
-}
-
-function manageClickOnGridSizeCancelButton() {
-	destroyDialogIfPresent("#select_size_dialog");
-}
-
-function createGridSizeDialogHelper() {
-	$("#select_size_dialog").dialog({
+	var localGridSizeDiv = createGridSizeDiv();
+	
+	return localGridSizeDiv.dialog({
 		autoOpen: false,
 		modal: true,
 		dialogClass: "no-close",
@@ -90,65 +43,66 @@ function createGridSizeDialogHelper() {
 	});
 }
 
-function listenForGridSizeOkButton() {
+function createGridSizeDiv() {
+	var localGridSizeDiv = $("<div id=\"select_size_dialog\" class=\"dialog\" style=\"text-align: center;margin: auto;\">");
+	
+	localGridSizeDiv.append("<form name=\"grid_size_form\" id=\"grid_size_form\" action=\"\" method=\"post\">");
+	localGridSizeDiv.append("<input type=\"text\" name=\"grid_size\" id=\"grid_size\" /><br /> <br />");
+	localGridSizeDiv.append("<input type=\"submit\" value=\"Next\" id=\"grid_size_ok_button\"> ");
+	localGridSizeDiv.append("<input type=\"submit\" value=\"Cancel\" id=\"grid_size_cancel_button\">");
+	localGridSizeDiv.append("</form>");
+	localGridSizeDiv.append("</div>");
+	
+	return localGridSizeDiv;
+}
+
+function listenToGridSizeOkButton() {
 	$("#grid_size_ok_button").on("click", manageClickOnGridSizeOkButton);
 }
 
-function manageClickOnGridSizeOkButton() {
-	$("#select_size_dialog").dialog("close");
-	
-	if(!validateForm("grid_size", "grid_size")) {
-		manageEmptySizeTextboxError();
+function manageClickOnGridSizeOkButton() {	
+	if(!validateForm($("#grid_size").val())) {
+		showError("The size field cannot be empty!!!");
+		gridSizeDialog.dialog("destroy");
+		gridSizeDialog = null;
 		
-		return false;
+		return;
 	}
-	else if(!positiveInteger("grid_size", "grid_size")) {
-		manageInvalidContentInSizeTextboxError();
+	else if(!positiveInteger($("#grid_size").val())) {
+		showError("The size must be an integer > 0 and <= 10");
+		gridSizeDialog.dialog("destroy");
+		gridSizeDialog = null;
 		
-		return false;
+		return;
 	}
 	else {
-		createUserAndMonitoringDialog();
-		$("#user_choice_dialog").dialog("open");
-		
-		return false;
+		initialState[0] = $("#grid_size").val();
+		gridSizeDialog.dialog("destroy");
+		gridSizeDialog = null;
+		createAndShowUserDialog();
 	}
 }
 
-function manageEmptySizeTextboxError() {
-	showError("The size must be an integer > 0 and <= 10");
+function listenToGridSizeCancelButton() {
+	$("#grid_size_ok_button").on("click", manageClickOnGridSizeCancelButton);
 }
 
-function manageInvalidContentInSizeTextboxError() {
-	showError("The size must be an integer > 0 and <= 10");
+function manageClickOnGridSizeCancelButton() {
+	gridSizeDialog.dialog("destroy");
+	gridSizeDialog = null;
 }
 
-function showError(text) {
-	createErrorDialog();
-	$("#error_message").html(text);
-	$("#error_dialog").dialog("open");
+function createAndShowUserDialog() {
+	userDialog = createUserDialog();
+	userDialog.dialog("open");
+	listenToUserOkButton();
+	listenToUserCancelButton();
+}
+
+function createUserDialog() {
+	var userDiv = createUserDiv();
 	
-	return false;
-}
-
-function createUserAndMonitoringDialog() {
-	destroyDialogIfPresent("#user_choice_dialog");
-	createUserAndMonitoringDialogHelper();
-	listenForUserAndMonitoringOkButton();
-	listenForUserAndMonitoringCancelButton();
-}
-
-function listenForUserAndMonitoringCancelButton() {
-	$("#user_and_monitoring_cancel_button").on("click", manageClickOnUserAndMonitoringCancelButton);
-}
-
-function manageClickOnUserAndMonitoringCancelButton() {
-	destroyDialogIfPresent("#select_size_dialog");
-	destroyDialogIfPresent("#user_choice_dialog");
-}
-
-function createUserAndMonitoringDialogHelper() {
-	$("#user_choice_dialog").dialog({
+	return userDiv.dialog({
 		autoOpen: false,
 		modal: true,
 		dialogClass: "no-close",
@@ -156,31 +110,53 @@ function createUserAndMonitoringDialogHelper() {
 	});
 }
 
-function listenForUserAndMonitoringOkButton() {
-	$("#user_and_monitoring_ok_button").on("click", manageClickOnUserAndMonitoringOkButton);
+function createUserDiv() {
+	var userDiv = $("<div id=\"user_choice_dialog\" class=\"dialog\" style=\"text-align: center;margin: auto;\">");
+	
+	userDiv.append("<form name=\"user_choice\" id=\"user_choice\" action=\"\" method=\"post\">");
+	userDiv.append("<input type=\"checkbox\" id=\"user_present\" name=\"user_present\" value=\"t1\" checked=\"checked\"/> Add random walking user<br /><br />");
+	userDiv.append("<input type=\"submit\" value=\"Next\" id=\"user_ok_button\"> ");
+	userDiv.append("<input type=\"submit\" value=\"Cancel\" id=\"user_cancel_button\">");
+	userDiv.append("</form>");
+	userDiv.append("</div>");
+	
+	return userDiv;
 }
 
-function manageClickOnUserAndMonitoringOkButton() {
-	$("#user_choice_dialog").dialog("close");
-	var size = document.forms["grid_size"]["grid_size"].value;
-	createGridDialog(size);
-	populateGridDialog(size);
-	$("#add_agents_or_dirts_dialog").dialog("open");
+function listenToUserOkButton() {
+	$("#user_ok_button").on("click", manageClickOnUserOkButton);
+}
+
+function manageClickOnUserOkButton() {
+	initialState[1] = $("#user_present").prop("checked") ? "yes" : "no";
+	userDialog.dialog("destroy");
+	userDialog = null;
+	createAndShowGridDialog();
+}
+
+function listenToUserCancelButton() {
+	$("#user_cancel_button").on("click", manageClickOnUserCancelButton);
+}
+
+function manageClickOnUserCancelButton() {
+	userDialog.dialog("destroy");
+	userDialog = null;
+}
+
+function createAndShowGridDialog() {
+	var size = initialState[0];
 	
-	return false;
+	gridDialog = createGridDialog(size);
+	addListenersToLocations(size);
+	gridDialog.dialog("open");
+	listenToGridOkButton();
+	listenToGridCancelButton();
 }
 
 function createGridDialog(size) {
-	destroyDialogIfPresent("#add_agents_or_dirts_dialog");
-	createGridDialogHelper(size);
-	listenForAddAgentsOkButton();
-	listenForAddAgentsCancelButton();
+	var gridDiv = createGridDiv(size);
 	
-	return size;
-}
-
-function createGridDialogHelper(size) {
-	$("#add_agents_or_dirts_dialog").dialog({
+	return gridDiv.dialog({
 		autoOpen: false,
 		modal: true,
 		dialogClass: "no-close",
@@ -190,112 +166,128 @@ function createGridDialogHelper(size) {
 	});
 }
 
-function populateGridDialog(size) {
-	for(var i = 0; i < size; i++) {		
-		for(var j = 0; j < size; j++) {
-			setupLocationImage(i, j);
-		}
-		
-		$("#dialog_grid").append("<br />");
-	}
+function createGridDiv(size) {
+	var gridDiv = $("<div id=\"add_agents_or_dirts_dialog\" class=\"dialog\" style=\"text-align: center;margin: auto;\">");
 	
-	$("#dialog_grid").append("<br />");
+	gridDiv.append("<div id=\"dialog_grid\" class=\"centered_div\" style=\"text-align: center;margin: auto;\">");
+	var squares = generateGridSquares(size);
+	gridDiv.append(squares);
+	gridDiv.append("</div>");
+	gridDiv.append("<form name=\"add_agents_or_dirts\" id=\"add_agents_or_dirts\" action=\"\" method=\"post\">");
+	gridDiv.append("<div class=\"centered_div\" style=\"text-align: center;margin: auto;\">");
+	gridDiv.append("<input type=\"submit\" value=\"Next\" id=\"grid_ok_button\"> ");
+	gridDiv.append("<input type=\"submit\" value=\"Cancel\" id=\"grid_cancel_button\">");
+	gridDiv.append("</div>");
+	gridDiv.append("</form>");
+	gridDiv.append("</div>");
+	
+	return gridDiv;
 }
 
-function setupLocationImage(i, j) {
-	var y = i+1, x = j+1;
-	var id = "image_" + x + "_" + y;
-	$("#dialog_grid").append("<img id=\"" + id + "\" class=\"grid_image\" src=\"images/location.png\" />");
-	$("#" + id).on("click", {id: id}, manageClickOnLocationImage);
+function generateGridSquares(size) {
+	var squares = "";
+	
+	for(var i = 0; i < size; i++) {		
+		for(var j = 0; j < size; j++) {
+			var y = i+1, x = j+1;
+			var id = "image_" + x + "_" + y;
+			squares += "<img id=\"" + id + "\" class=\"grid_image\" src=\"images/location.png\" />";
+		}
+		
+		squares += "<br />";
+	}
+	
+	squares += "<br />";
+	
+	return squares;
+}
+
+function addListenersToLocations(size) {
+	for(var i = 0; i < size; i++) {		
+		for(var j = 0; j < size; j++) {
+			var y = i+1, x = j+1;
+			var id = "image_" + x + "_" + y;
+			$("#" + id).on("click", {id: id}, manageClickOnLocationImage);
+		}
+	}
 }
 
 function manageClickOnLocationImage(event) {
-	clicked = event.data.id;
-	resumeOrRecreateAddAgentOrDirtDialog();
-	listenForAddAgentOrDirtOkButton(event.data.id);
-	listenForAddAgentOrDirtCancelButton();
+	var id = event.data.id;
 	
-	return false;
+	addBodyDialog = createAddBodyDialog();
+	addBodyDialog.dialog("open");
+	listenForAddBodyOkButton(id);
+	listenForAddBodyCancelButton();
 }
 
-function resumeOrRecreateAddAgentOrDirtDialog() {
-	if(!$("#add_agent_or_dirt").hasClass('ui-dialog-content')) {
-		createAddAgentOrDirtDialog();
-	}
+function createAddBodyDialog() {
+	var addBodyDiv = createAddBodyDiv();
 	
-	$("#add_agent_or_dirt_dialog").dialog("open");
-}
-
-function createAddAgentOrDirtDialog() {
-	$("#add_agent_or_dirt_dialog").dialog({
+	return addBodyDiv.dialog({
 		autoOpen: false,
 		modal: true,
-		dialogClass: "no-close",
+		dialogClass: "no-close", 
 		title: "Choose an agent or dirt type",
 		width: "400",
 	});
 }
 
-function listenForAddAgentOrDirtOkButton(id) {
-	$("#add_agent_or_dirt_ok_button").on("click", {id: id}, manageClickOnAddAgentOrDirtOkButton);
-}
-
-function manageClickOnAddAgentOrDirtOkButton(event) {
-	if(clicked === event.data.id) {
-		var choice = $('input:radio[name=agent_or_dirt]:checked').val();
-		var newImage = "images/" + choice + ".png";
-		$("#" + event.data.id).attr("src", newImage);
-		clicked = null;
-	}
+function createAddBodyDiv() {
+	var addBodyDiv = $("<div class=\"centered_div\" id=\"add_agent_or_dirt_dialog\" style=\"text-align: center;margin: auto;\">");
 	
-	$("#add_agent_or_dirt_dialog").dialog("close");
+	addBodyDiv.append("<form action=\"\" method=\"post\">");
+	addBodyDiv.append("<div id=\"agent_or_dirt_choices\" class=\"radio_choices\" style=\"text-align: left;margin: auto;\">");
+	addBodyDiv.append("<input type=\"radio\" name=\"agent_or_dirt\" value=\"green_north\" checked=\"checked\" /> Green agent facing North<br />");
+	addBodyDiv.append("<input type=\"radio\" name=\"agent_or_dirt\" value=\"green_south\" /> Green agent facing South<br />");
+	addBodyDiv.append("<input type=\"radio\" name=\"agent_or_dirt\" value=\"green_west\" /> Green agent facing West<br />");
+	addBodyDiv.append("<input type=\"radio\" name=\"agent_or_dirt\" value=\"green_east\" /> Green agent facing East<br />");
+	addBodyDiv.append("<input type=\"radio\" name=\"agent_or_dirt\" value=\"orange_north\" /> Orange agent facing North<br />");
+	addBodyDiv.append("<input type=\"radio\" name=\"agent_or_dirt\" value=\"orange_south\" /> Orange agent facing South<br />");
+	addBodyDiv.append("<input type=\"radio\" name=\"agent_or_dirt\" value=\"orange_west\" /> Orange agent facing West<br />");
+	addBodyDiv.append("<input type=\"radio\" name=\"agent_or_dirt\" value=\"orange_east\" /> Orange agent facing East<br />");
+	addBodyDiv.append("<input type=\"radio\" name=\"agent_or_dirt\" value=\"white_north\" /> White agent facing North<br />");
+	addBodyDiv.append("<input type=\"radio\" name=\"agent_or_dirt\" value=\"white_south\" /> White agent facing South<br />");
+	addBodyDiv.append("<input type=\"radio\" name=\"agent_or_dirt\" value=\"white_west\" /> White agent facing West<br />");
+	addBodyDiv.append("<input type=\"radio\" name=\"agent_or_dirt\" value=\"white_east\" /> White agent facing East<br />");
+	addBodyDiv.append("<input type=\"radio\" name=\"agent_or_dirt\" value=\"green_dirt\" /> Green dirt<br />");
+	addBodyDiv.append("<input type=\"radio\" name=\"agent_or_dirt\" value=\"orange_dirt\" /> Orange dirt<br />");
+	addBodyDiv.append("<input type=\"radio\" name=\"agent_or_dirt\" value=\"location\" /> Empty location<br />");
+	addBodyDiv.append("<br />");
+	addBodyDiv.append("</div>");
+	addBodyDiv.append("<div class=\"centered_div\" style=\"text-align: center;margin: auto;\">");
+	addBodyDiv.append("<input type=\"button\" value=\"Add\" id=\"add_body_ok_button\"/> ");
+	addBodyDiv.append("<input type=\"button\" value=\"Cancel\" id=\"add_body_cancel_button\"/>");
+	addBodyDiv.append("</div>");
+	addBodyDiv.append("</form>");
+	addBodyDiv.append("</div>");
 	
-	return false;
+	return addBodyDiv;
 }
 
-function listenForAddAgentOrDirtCancelButton() {
-	$("#add_agent_or_dirt_cancel_button").on("click", manageClickOnAddAgentOrDirtCancelButton);
+function listenForAddBodyOkButton(id) {
+	$("#add_body_ok_button").on("click", {id: id}, manageClickOnAddBodyOkButton);
 }
 
-function manageClickOnAddAgentOrDirtCancelButton() {
-	$("#add_agent_or_dirt_dialog").dialog("close");
-	clicked = null;
+function manageClickOnAddBodyOkButton(event) {
+	var choice = $('input:radio[name=agent_or_dirt]:checked').val();
+	var newImage = "images/" + choice + ".png";
+	$("#" + event.data.id).attr("src", newImage);
 	
-	return false;
+	addBodyDialog.dialog("destroy");
+	addBodyDialog = null;
 }
 
-function listenForAddAgentsOkButton() {
-	$("#add_agents_ok_button").on("click", manageClickOnAddAgentsOkButton);
+function listenForAddBodyCancelButton() {
+	$("#add_body_cancel_button").on("click", manageClickOnAddBodyCancelButton);
 }
 
-function listenForAddAgentsCancelButton() {
-	$("#add_agents_cancel_button").on("click", manageClickOnAddAgentsCancelButton);
+function manageClickOnAddBodyCancelButton() {
+	addBodyDialog.dialog("destroy");
+	addBodyDialog = null;
 }
 
-function manageClickOnAddAgentsCancelButton() {
-	destroyDialogIfPresent("#select_size_dialog");
-	destroyDialogIfPresent("#user_choice_dialog");
-	destroyDialogIfPresent("#add_agents_or_dirt_dialog");
-}
-
-function manageClickOnAddAgentsOkButton() {
-	if(noAgents()) {
-		manageNoAgentsAddedError();
-		
-		return false;
-	}
-	else {
-		$("#add_agents_or_dirts_dialog").dialog("close");
-		createNewTemplateRecapDialog();
-		$("#recap_dialog").dialog("open");
-		
-		return false;
-	}
-}
-
-function noAgents() {
-	var size = document.forms["grid_size"]["grid_size"].value;
-	
+function noAgents(size) {	
 	for(var i = 0; i < size; i++) {		
 		for(var j = 0; j < size; j++) {
 			var y = i+1, x = j+1;
@@ -311,76 +303,31 @@ function noAgents() {
 	return true;
 }
 
-function manageNoAgentsAddedError() {
-	showError("Add at least one agent!!!");
+function listenToGridOkButton() {
+	$("#grid_ok_button").on("click", manageClickOnGridOkButton);
+}
+
+function manageClickOnGridOkButton() {
+	var size = initialState[0];
 	
-	return false;
+	if(noAgents(size)) {
+		showError("Add at least one agent!!!");
+	}
+	else {
+		initialState[2] = buildNotableLocations(initialState[0]);
+		gridDialog.dialog("destroy");
+		gridDialog = null;
+		createAndShowRecapDialog();
+	}
 }
 
-function createNewTemplateRecapDialog() {
-	destroyDialogIfPresent("#recap_dialog");
-	createNewTemplateRecapDialogHelper();
-	listenForRecapOkButton();
-	listenForRecapSaveButton();
-	listenForRecapCancelButton();
+function listenToGridCancelButton() {
+	$("#grid_cancel_button").on("click", manageClickOnGridCancelButton);
 }
 
-function createNewTemplateRecapDialogHelper() {
-	$("#recap_dialog").dialog({
-		autoOpen: false,
-		modal: true,
-		dialogClass: "no-close",
-		title: "Are you satisfied with your choices?",
-		width: 500,
-	});
-}
-
-function listenForRecapOkButton() {
-	$("#recap_ok_button").on("click", manageClickOnRecapOkButton);
-}
-
-function listenForRecapSaveButton() {
-	$("#recap_save_button").on("click", manageClickOnRecapSaveButton);
-}
-
-function listenForRecapCancelButton() {
-	$("#recap_cancel_button").on("click", manageClickOnRecapCancelButton);
-}
-
-function manageClickOnRecapCancelButton() {
-	destroyDialogIfPresent("#select_size_dialog");
-	destroyDialogIfPresent("#user_choice_dialog");
-	destroyDialogIfPresent("#add_agents_or_dirt_dialog");
-	destroyDialogIfPresent("#add_agent_or_dirt_dialog");
-	destroyDialogIfPresent("#recap_dialog");
-}
-
-function manageClickOnRecapSaveButton() {
-	showError("Not yet implemented!!!");
-}
-
-function manageClickOnRecapOkButton() {
-	$("#recap_dialog").dialog("close");
-	collectDataAndStartSystem();
-	
-	return false;
-}
-
-function collectDataAndStartSystem() {
-	var initialState = collectData();
-	
-	$.post("start", {INITIAL:initialState}, function(data) {
-		window.location = data;
-	});
-}
-
-function collectData() {
-	var size = document.forms["grid_size"]["grid_size"].value;
-	var userPresent = $("#user_present").prop("checked") ? "yes" : "no";
-	var monitoring = $("#monitoring_active").prop("checked") ? "yes" : "no";
-	
-	var locations = buildNotableLocations(size);
-	return [size, userPresent, monitoring, locations];
+function manageClickOnGridCancelButton() {
+	gridDialog.dialog("destroy");
+	gridDialog = null;
 }
 
 function buildNotableLocations(size) {
@@ -476,3 +423,76 @@ function createNotableLocationWithDirt(x, y, name) {
 		return null;
 	}
 }
+
+function createAndShowRecapDialog() {
+	recapDialog = createRecapDialog();
+	recapDialog.dialog("open");
+	listenToRecapOkButton();
+	listenToRecapCancelButton();
+}
+
+function createRecapDialog() {
+	var recapDiv = createRecapDiv();
+	
+	return recapDiv.dialog({
+		autoOpen: false,
+		modal: true,
+		dialogClass: "no-close",
+		title: "Are you satisfied with your choices?",
+		width: 500,
+	});
+}
+
+function createRecapDiv() {
+	var recapDiv = $("<div id=\"recap_dialog\" class=\"dialog\" style=\"text-align: center;margin: auto;\">");
+	
+	recapDiv.append("<form action=\"\" method=\"post\">");
+	recapDiv.append("<div class=\"centered_div\" style=\"text-align: center;margin: auto;\">");
+	recapDiv.append("<p>OK to proceed, Cancel to abort.</p>");
+	recapDiv.append("<input type=\"button\" value=\"Ok\" id=\"recap_ok_button\" /> ");
+	recapDiv.append("<input type=\"button\" value=\"Cancel\" id=\"recap_cancel_button\"/>");
+	recapDiv.append("</div>");
+	recapDiv.append("</form>");
+	recapDiv.append("</div>");
+	
+	return recapDiv;
+}
+
+function listenToRecapOkButton() {
+	$("#recap_ok_button").on("click", manageClickOnRecapOkButton);
+}
+
+function manageClickOnRecapOkButton() {
+	recapDialog.dialog("destroy");
+	recapDialog = null;
+	startSystem();
+}
+
+function startSystem() {
+	$.post("start", {INITIAL:initialState}, function(data) {
+		window.location = data;
+	});
+}
+
+function listenToRecapCancelButton() {
+	$("#recap_cancel_button").on("click", manageClickOnRecapCancelButton);
+}
+
+function manageClickOnRecapCancelButton() {
+	recapDialog.dialog("destroy");
+	recapDialog = null;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+

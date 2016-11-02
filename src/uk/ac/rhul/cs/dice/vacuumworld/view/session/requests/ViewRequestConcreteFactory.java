@@ -1,6 +1,5 @@
 package uk.ac.rhul.cs.dice.vacuumworld.view.session.requests;
 
-import java.io.FileOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -11,7 +10,6 @@ import javax.json.JsonArray;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
-import javax.json.JsonWriter;
 import javax.servlet.http.HttpServletRequest;
 
 import uk.ac.rhul.cs.dice.vacuumworld.view.representation.AgentRepresentation;
@@ -78,31 +76,21 @@ public class ViewRequestConcreteFactory implements ViewRequestsVisitorInterface 
 	private static ViewRequest createStartRequest(ViewRequestsEnum code, String[] data) {
 		int gridSize = Integer.parseInt(data[0]);
 		boolean user = "yes".equals(data[1]) ? true : false;
-		boolean monitoring = "yes".equals(data[2]) ? true : false;
 		
 		List<List<ObjectRepresentation>> locationsList = new ArrayList<>();
 		
-		if(data.length == 4) {
+		if(data.length == 3) {
 			addLocation(locationsList, data);
 		}
 		
-		JsonObject initialState = createTemplate(gridSize, gridSize, locationsList, user, monitoring);
-		
-		try {
-		    JsonWriter writer = Json.createWriter(new FileOutputStream("/home/cloudstrife9999/first_state.json"));
-		    writer.writeObject(initialState);
-		    writer.close();
-		}
-		catch(Exception e) {
-		    e.printStackTrace();
-		}
+		JsonObject initialState = createTemplate(gridSize, gridSize, locationsList, user);
 		
 		return new ViewRequest(code, initialState.toString());
 	}
 
 	private static void addLocation(List<List<ObjectRepresentation>> locationsList, String[] data) {
-		if(data[3].length() > 0) {
-			String[] locations = data[3].split("#");
+		if(data[2].length() > 0) {
+			String[] locations = data[2].split("#");
 			
 			for(String location : locations) {
 				String[] info = location.split("\\|");
@@ -174,7 +162,7 @@ public class ViewRequestConcreteFactory implements ViewRequestsVisitorInterface 
 		return toReturn;
 	}
 
-	private static JsonObject createTemplate(int width, int height, List<List<ObjectRepresentation>> locations, boolean user, boolean monitoring) {
+	private static JsonObject createTemplate(int width, int height, List<List<ObjectRepresentation>> locations, boolean user) {
 		JsonArrayBuilder array = Json.createArrayBuilder();
 		
 		for(List<ObjectRepresentation> location : locations) {
@@ -183,7 +171,7 @@ public class ViewRequestConcreteFactory implements ViewRequestsVisitorInterface 
 		
 		JsonArray locationsArray = array.build();
 		
-		return Json.createObjectBuilder().add(Utils.WITDH, width).add(Utils.HEIGHT, height).add(Utils.USER, user).add(Utils.MONITORING, monitoring).add(Utils.NOTABLE_LOCATIONS, locationsArray).build();
+		return Json.createObjectBuilder().add(Utils.WITDH, width).add(Utils.HEIGHT, height).add(Utils.USER, user).add(Utils.NOTABLE_LOCATIONS, locationsArray).build();
 	}
 
 	private static JsonObject buildLocation(List<ObjectRepresentation> location) {

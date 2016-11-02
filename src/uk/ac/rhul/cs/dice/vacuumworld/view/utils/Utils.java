@@ -24,7 +24,6 @@ public class Utils {
 	public static final String HEIGHT = "height";
 	public static final String X = "x";
 	public static final String Y = "y";
-	public static final String MONITORING = "monitoring";
 	public static final String NOTABLE_LOCATIONS = "notable_locations";
 	public static final String BEGIN_LOCATION = "begin_location";
 	public static final String END_LOCATION = "end_location";

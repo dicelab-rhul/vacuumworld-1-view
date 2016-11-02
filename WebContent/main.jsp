@@ -11,9 +11,12 @@
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.0/jquery-ui.min.js"></script>
 <script src="main.js"></script>
+<!--
 <script src="load.js"></script>
 <script src="load_file.js"></script>
+-->
 <script src="new.js"></script>
+<script src="error.js"></script>
 </head>
 <body>
 
@@ -41,77 +44,14 @@
 				<div id="main_menu_options">
 					<form id="main_menu_options_form">
 						<input type="button" class="main_menu_button" id="new_simulation_button" name="new" value="NEW" />
+						<!--
 						<input type="button" class="main_menu_button" id="load_button" name="load" value="LOAD TEMPLATE" />
 						<input type="button" class="main_menu_button" id="load_file_button" name="load_file" value="LOAD TEMPLATE FROM FILE" />
+						-->
 					</form>
 				</div>
 			</div>
-			
-			<div id="select_size_dialog" class="dialog">
-				<form name="grid_size" id="grid_size_form" action="" method="post">
-					<input type="text" name="grid_size" id="grid_size" /><br /> <br />
-					<input type="submit" value="Next" id="grid_size_ok_button">
-					<input type="submit" value="Cancel" id="grid_size_cancel_button">
-				</form>
-			</div>
-			
-			<div id="user_choice_dialog" class="dialog">
-				<form name="user_choice" id="user_choice" action="" method="post">
-					<input type="checkbox" id="user_present" name="user_present" value="t1" checked="checked"/> Add random walking user<br />
-					<input type="checkbox" id="monitoring_active" name="monitoring_active" value="t2" /> Activate monitoring<br /> <br />
-					<input type="submit" value="Next" id="user_and_monitoring_ok_button">
-					<input type="submit" value="Cancel" id="user_and_monitoring_cancel_button">
-				</form>
-			</div>
-			
-			<div id="add_agents_or_dirts_dialog" class="dialog">
-				<div id="dialog_grid" class="centered_div"></div>
-				<form name="add_agents_or_dirts" id="add_agents_or_dirts" action="" method="post">
-					<div class="centered_div">
-						<input type="submit" value="Next" id="add_agents_ok_button">
-						<input type="submit" value="Cancel" id="add_agents_cancel_button">
-					</div>
-				</form>
-			</div>
-			
-			<div id="add_agent_or_dirt_dialog" class="dialog">
-				<div id="agent_or_dirt_choices" class="radio_choices">
-					<form action="" method="post">
-						<input type="radio" name="agent_or_dirt" value="green_north" checked="checked" /> Green agent facing North<br />
-						<input type="radio" name="agent_or_dirt" value="green_south" /> Green agent facing South<br />
-						<input type="radio" name="agent_or_dirt" value="green_west" /> Green agent facing West<br />
-						<input type="radio" name="agent_or_dirt" value="green_east" /> Green agent facing East<br />
-						<input type="radio" name="agent_or_dirt" value="orange_north" /> Orange agent facing North<br />
-						<input type="radio" name="agent_or_dirt" value="orange_south" /> Orange agent facing South<br />
-						<input type="radio" name="agent_or_dirt" value="orange_west" /> Orange agent facing West<br />
-						<input type="radio" name="agent_or_dirt" value="orange_east" /> Orange agent facing East<br />
-						<input type="radio" name="agent_or_dirt" value="white_north" /> White agent facing North<br />
-						<input type="radio" name="agent_or_dirt" value="white_south" /> White agent facing South<br />
-						<input type="radio" name="agent_or_dirt" value="white_west" /> White agent facing West<br />
-						<input type="radio" name="agent_or_dirt" value="white_east" /> White agent facing East<br />
-						<input type="radio" name="agent_or_dirt" value="green_dirt" /> Green dirt<br />
-						<input type="radio" name="agent_or_dirt" value="orange_dirt" /> Orange dirt<br />
-						<input type="radio" name="agent_or_dirt" value="location" /> Empty location<br />
-						<br />
-						<div class="centered_div">
-							<input type="button" value="Add" id="add_agent_or_dirt_ok_button"/>
-							<input type="button" value="Cancel" id="add_agent_or_dirt_cancel_button"/>
-						</div>
-					</form>
-				</div>
-			</div>
-			
-			<div id="recap_dialog" class="dialog">
-				<form action="" method="post">
-					<div class="centered_div">
-						<p>OK to proceed, Save to store the template, Cancel to abort.</p>
-						<input type="button" value="Ok" id="recap_ok_button" />
-						<input type="button" value="Save Template" id="recap_save_button" />
-						<input type="button" value="Cancel" id="recap_cancel_button"/>
-					</div>
-				</form>
-			</div>
-			
+			<!--
 			<div id="load_template" class="dialog">	
 				<div id="templates" class="radio_choices">
 					<form action="start" method="post">
@@ -136,6 +76,7 @@
 					<input type="button" value="Cancel" id="cancel_file_upload" />
 				</form>
 			</div>
+			-->
 		<%
 	}
 	else {

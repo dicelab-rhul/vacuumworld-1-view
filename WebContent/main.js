@@ -1,16 +1,11 @@
-function validateForm(formName, subElementName) {
-    var x = document.forms[formName][subElementName].value;
-    
-    if (x == null || x == "") {
+function validateForm(x) { 
+	if (x === null || x === "") {    	
         return false;
     }
     
     return true;
 }
 
-function positiveInteger(formName, subElementName) {
-	var n = document.forms[formName][subElementName].value;
-	var x = Number(n);
-	
-	return $.isNumeric(x) && x > 0 && x <= 10;
+function positiveInteger(n) {	
+	return n.match(/^([1-9]|10)$/) != null;
 }
